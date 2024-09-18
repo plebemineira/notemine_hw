@@ -30,40 +30,64 @@ xxx todo build instructions with cargo feature flags xxx
 
 ```shell
 $ notemine_hw -h
-Usage: notemine_hw --n-workers <N_WORKERS> --difficulty <DIFFICULTY> --event-json <EVENT_JSON>
+Usage: notemine_hw --n-workers <N_WORKERS> --difficulty <DIFFICULTY> --event-json <EVENT_JSON> --relay-url <RELAY_URL> --log-interval <LOG_INTERVAL> --nsec <NSEC>
 
 Options:
-  -n, --n-workers <N_WORKERS>    number of workers
-  -d, --difficulty <DIFFICULTY>  difficulty
-  -e, --event-json <EVENT_JSON>  path to event JSON file
-  -h, --help                     Print help
+      --n-workers <N_WORKERS>        number of workers
+  -d, --difficulty <DIFFICULTY>      difficulty
+  -e, --event-json <EVENT_JSON>      path to event JSON file
+  -r, --relay-url <RELAY_URL>        relay URL
+  -l, --log-interval <LOG_INTERVAL>  log interval (secs)
+      --nsec <NSEC>                  nsec
+  -h, --help                         Print help
 
-$ notemine_hw --n-workers 3 --difficulty 20 --event-json event.json
-2024-09-18T19:21:20.665505Z  INFO notemine_hw: 🗒⛏ notemine_hw ⚡⚙️
-2024-09-18T19:21:20.665857Z  INFO notemine: starting worker with parameters: worker id: 1 | difficulty: 20 | start_nonce: 1 | nonce_step: 6148914691236517205
-2024-09-18T19:21:20.665857Z  INFO notemine: starting worker with parameters: worker id: 0 | difficulty: 20 | start_nonce: 0 | nonce_step: 6148914691236517205
-2024-09-18T19:21:20.665857Z  INFO notemine: starting worker with parameters: worker id: 2 | difficulty: 20 | start_nonce: 2 | nonce_step: 6148914691236517205
-2024-09-18T19:21:21.665960Z  INFO notemine: worker id: 1 | hashrate: 52254 h/s | best pow: 15 | best nonce: 6148914691236514724 | best hash: "0001b2395292f878dd9283888659dc9fd23d4001a08ad7a567266d8759247e8f"
-2024-09-18T19:21:21.665960Z  INFO notemine: worker id: 0 | hashrate: 52080 h/s | best pow: 15 | best nonce: 6148914691236514724 | best hash: "0001b2395292f878dd9283888659dc9fd23d4001a08ad7a567266d8759247e8f"
-2024-09-18T19:21:21.665982Z  INFO notemine: worker id: 2 | hashrate: 51518 h/s | best pow: 15 | best nonce: 6148914691236514724 | best hash: "0001b2395292f878dd9283888659dc9fd23d4001a08ad7a567266d8759247e8f"
-2024-09-18T19:21:22.665970Z  INFO notemine: worker id: 0 | hashrate: 52592 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:22.665998Z  INFO notemine: worker id: 2 | hashrate: 52680 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:22.665970Z  INFO notemine: worker id: 1 | hashrate: 52612 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:23.665983Z  INFO notemine: worker id: 1 | hashrate: 52805 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:23.665995Z  INFO notemine: worker id: 0 | hashrate: 52773 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:23.666028Z  INFO notemine: worker id: 2 | hashrate: 52625 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:24.666001Z  INFO notemine: worker id: 1 | hashrate: 52837 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:24.666011Z  INFO notemine: worker id: 0 | hashrate: 52813 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:24.666042Z  INFO notemine: worker id: 2 | hashrate: 52719 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:25.665994Z  INFO notemine: worker id: 1 | hashrate: 52815 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:25.666025Z  INFO notemine: worker id: 0 | hashrate: 52654 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:25.666067Z  INFO notemine: worker id: 2 | hashrate: 52822 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:26.666019Z  INFO notemine: worker id: 1 | hashrate: 52816 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:26.666036Z  INFO notemine: worker id: 0 | hashrate: 52671 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:26.666075Z  INFO notemine: worker id: 2 | hashrate: 52807 h/s | best pow: 16 | best nonce: 18446744073709519723 | best hash: "00008d51ef546ec45059e5113d39ec65459bb7160981e3a917265a5f19e23b03"
-2024-09-18T19:21:27.150643Z  INFO notemine_hw: successfully mined event in 6.4855957 seconds
-2024-09-18T19:21:27.150668Z  INFO notemine_hw: MinedResult { event: NostrEvent { pubkey: "e771af0b05c8e95fcdf6feb3500544d2fb1ccd384788e9f490bb3ee28e8ed66f", kind: 1, content: "hello world", tags: [["nonce", "12297829382472920563", "20"]], id: Some("0000047edf56cefcdc1d35f352b7453011b3bc24552b0fb36880efde721fb915"), created_at: Some(1668680774) }, total_time: 6.484595042, khs: 3.9180549957925965 }
-2024-09-18T19:21:27.150692Z  INFO notemine_hw: exiting...
+
+$ notemine_hw --n-workers 7 -d 18 --event-json event.json -r ws://plebemineira.xyz:8080 --nsec npub1npvscr6ftxjf7dfyklqqnsvs0xyntm422zcjx2a8gx2mgx025teqvx4ghy --log-interval 2
+2024-09-20T03:00:01.780143Z  INFO notemine_hw: 🗒⛏ notemine_hw ⚡⚙️
+2024-09-20T03:00:01.780510Z  INFO notemine::miner: starting worker with parameters: worker id: 0 | difficulty: 18 | start_nonce: 0 | nonce_step: 2635249153387078802
+2024-09-20T03:00:01.780526Z  INFO notemine::miner: starting worker with parameters: worker id: 1 | difficulty: 18 | start_nonce: 1 | nonce_step: 2635249153387078802
+2024-09-20T03:00:01.780564Z  INFO notemine::miner: starting worker with parameters: worker id: 2 | difficulty: 18 | start_nonce: 2 | nonce_step: 2635249153387078802
+2024-09-20T03:00:01.780629Z  INFO notemine::miner: starting worker with parameters: worker id: 3 | difficulty: 18 | start_nonce: 3 | nonce_step: 2635249153387078802
+2024-09-20T03:00:01.780639Z  INFO notemine::miner: starting worker with parameters: worker id: 4 | difficulty: 18 | start_nonce: 4 | nonce_step: 2635249153387078802
+2024-09-20T03:00:01.780662Z  INFO notemine::miner: starting worker with parameters: worker id: 5 | difficulty: 18 | start_nonce: 5 | nonce_step: 2635249153387078802
+2024-09-20T03:00:01.781942Z  INFO notemine::miner: starting worker with parameters: worker id: 6 | difficulty: 18 | start_nonce: 6 | nonce_step: 2635249153387078802
+2024-09-20T03:00:03.780607Z  INFO notemine::miner: worker id: 0 | hashrate: 53457 h/s | best pow: 15 | best nonce: 13176245766935384394 | best hash: "0001d724579b85058862f118044637b7d740c69ac77294d7e4c15e85c29ebbea"
+2024-09-20T03:00:03.780617Z  INFO notemine::miner: worker id: 1 | hashrate: 62991 h/s | best pow: 14 | best nonce: 5270498306774147101 | best hash: "00037233a6d87e65da3636109df00f062404a5a4b71416409b18399c4d8bd0b0"
+2024-09-20T03:00:03.780645Z  INFO notemine::miner: worker id: 2 | hashrate: 53888 h/s | best pow: 15 | best nonce: 13176245766935384394 | best hash: "0001d724579b85058862f118044637b7d740c69ac77294d7e4c15e85c29ebbea"
+2024-09-20T03:00:03.780705Z  INFO notemine::miner: worker id: 3 | hashrate: 54962 h/s | best pow: 14 | best nonce: 5270498306774147101 | best hash: "00037233a6d87e65da3636109df00f062404a5a4b71416409b18399c4d8bd0b0"
+2024-09-20T03:00:03.780707Z  INFO notemine::miner: worker id: 4 | hashrate: 53887 h/s | best pow: 15 | best nonce: 13176245766935384394 | best hash: "0001d724579b85058862f118044637b7d740c69ac77294d7e4c15e85c29ebbea"
+2024-09-20T03:00:03.780712Z  INFO notemine::miner: worker id: 5 | hashrate: 66345 h/s | best pow: 14 | best nonce: 5270498306774147101 | best hash: "00037233a6d87e65da3636109df00f062404a5a4b71416409b18399c4d8bd0b0"
+2024-09-20T03:00:03.782005Z  INFO notemine::miner: worker id: 6 | hashrate: 53792 h/s | best pow: 15 | best nonce: 13176245766935384394 | best hash: "0001d724579b85058862f118044637b7d740c69ac77294d7e4c15e85c29ebbea"
+2024-09-20T03:00:05.780634Z  INFO notemine::miner: worker id: 1 | hashrate: 53699 h/s | best pow: 15 | best nonce: 2635249153387059735 | best hash: "000105552d83dcfc1bb4f6449f54cd1cd8faea7bd1b5382fa4e48c2591308e74"
+2024-09-20T03:00:05.780650Z  INFO notemine::miner: worker id: 2 | hashrate: 53232 h/s | best pow: 15 | best nonce: 13176245766935384394 | best hash: "0001d724579b85058862f118044637b7d740c69ac77294d7e4c15e85c29ebbea"
+2024-09-20T03:00:05.780634Z  INFO notemine::miner: worker id: 0 | hashrate: 67169 h/s | best pow: 17 | best nonce: 15811494920322439638 | best hash: "0000662299d677b538288802d0707bfad2cd12007227bd0d53819ac3107e75a0"
+2024-09-20T03:00:05.780725Z  INFO notemine::miner: worker id: 3 | hashrate: 64657 h/s | best pow: 15 | best nonce: 2635249153387059735 | best hash: "000105552d83dcfc1bb4f6449f54cd1cd8faea7bd1b5382fa4e48c2591308e74"
+2024-09-20T03:00:05.780725Z  INFO notemine::miner: worker id: 5 | hashrate: 57281 h/s | best pow: 17 | best nonce: 18446744073709516953 | best hash: "00004337a7b72a077ebdc735fe21e664f2518d7e86970379f6ad6d61720d0b5b"
+2024-09-20T03:00:05.780733Z  INFO notemine::miner: worker id: 4 | hashrate: 53695 h/s | best pow: 15 | best nonce: 13176245766935384394 | best hash: "0001d724579b85058862f118044637b7d740c69ac77294d7e4c15e85c29ebbea"
+2024-09-20T03:00:05.782003Z  INFO notemine::miner: worker id: 6 | hashrate: 58479 h/s | best pow: 15 | best nonce: 13176245766935384394 | best hash: "0001d724579b85058862f118044637b7d740c69ac77294d7e4c15e85c29ebbea"
+2024-09-20T03:00:07.714490Z  INFO notemine_hw: successfully mined event in 5.934721 seconds
+2024-09-20T03:00:07.714526Z  INFO notemine_hw: MinedResult { event: NostrEvent { pubkey: "79dff8f82963424e0bb02708a22e44b4980893e3a4be0fa3cb60a43b946764e3", kind: 1, content: "hello world", tags: [["nonce", "15811494920322422749", "18"]], id: Some("00003b51118581384f573b4939556dcd2743e02977bba1e73214ffc02d573304"), created_at: Some(1668680774), sig: "4be1dccd81428990ba56515f2e9fc2ae61c9abc61dc3d977235fd8767f52010e44d36d3c8da30755b6440ccaf888442f7cbbd7a17e34ca3ed31c5e8a33a7df11" }, total_time: 5.933679131 }
+2024-09-20T03:00:07.718901Z  INFO notemine::client: connecting to relay: ws://plebemineira.xyz:8080
+2024-09-20T03:00:07.719180Z  INFO nostr_sdk::client::handler: Spawned client notification handler
+2024-09-20T03:00:07.719210Z  INFO nostr_relay_pool::relay::internal: 1 messages queued for ws://plebemineira.xyz:8080/ (capacity: 1023)
+2024-09-20T03:00:08.269040Z  INFO nostr_relay_pool::relay::internal: Connected to 'ws://plebemineira.xyz:8080/'
+2024-09-20T03:00:08.529793Z  INFO notemine::client: send mined event output: Output { val: EventId(00003b51118581384f573b4939556dcd2743e02977bba1e73214ffc02d573304), success: {Url { scheme: "ws", cannot_be_a_base: false, username: "", password: None, host: Some(Domain("plebemineira.xyz")), port: Some(8080), path: "/", query: None, fragment: None }}, failed: {} }
+2024-09-20T03:00:08.529897Z  INFO notemine_hw: exiting...
+```
+
+note: the `id` and `sig` fields of `event.json` should be declared but left with an empty string.
+
+for example:
+```json
+{
+  "id": "",
+  "pubkey": "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2",
+  "created_at": 1668680774,
+  "kind": 1,
+  "tags": [],
+  "content": "hello world",
+  "sig": ""
+}
 ```
 
 ## license
