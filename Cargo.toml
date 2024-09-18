@@ -1,29 +1,17 @@
 [package]
-name = "notemine"
-version = "0.2.1"
+name = "notemine_hw"
+version = "0.3.0"
 edition = "2021"
-description = "a nostr note miner compiled to wasm"
-repository = "https://github.com/sandwichfarm/notemine"
+description = "a nostr note miner with hardware acceleration"
+repository = "https://github.com/plebemineira/notemine_hw"
 license = "GPL-3.0-only"
 
 [lib]
-#crate-type = ["cdylib"]
 name = "notemine"
 path = "src/lib.rs"
-crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 sha2 = "0.10"
 hex = "0.4"
-js-sys = "0.3"
-web-sys = { version = "0.3", features = ["console"] }
-serde-wasm-bindgen = "0.6" # Added serde-wasm-bindgen
-console_error_panic_hook = "0.1.6" # Added for better error reporting
-
-#[profile.release]
-#opt-level = "z"
-#lto = true
-#codegen-units = 1
