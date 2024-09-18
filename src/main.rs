@@ -5,7 +5,7 @@ use clap::Parser;
 use futures::future::select_all;
 use tracing::info;
 
-use notemine::{mine_event, NostrEvent};
+use notemine::miner::{mine_event, NostrEvent};
 
 #[derive(Parser, Debug)]
 struct Args {
