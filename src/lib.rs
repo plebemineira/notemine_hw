@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
 use sha2::{Digest, Sha256};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+use tracing::info;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NostrEvent {
@@ -77,6 +78,7 @@ fn get_pow(hash_bytes: &[u8]) -> u32 {
 }
 
 pub fn mine_event(
+    worker_id: u64,
     event_json: &str,
     difficulty: u32,
     start_nonce: u64,
@@ -117,7 +119,10 @@ pub fn mine_event(
         nonce_index = Some(event.tags.len() - 1);
     }
 
-    let start_time = std::time::Instant::now();
+    info!(
+        "starting worker with parameters: worker id: {} | difficulty: {} | start_nonce: {} | nonce_step: {}",
+        worker_id, difficulty, start_nonce, nonce_step
+    );
 
     let mut nonce: u64 = start_nonce;
     let mut total_hashes: u64 = 0;
@@ -128,7 +133,27 @@ pub fn mine_event(
     #[allow(unused_assignments)]
     let mut best_hash_bytes: Vec<u8> = Vec::new();
 
+    let start_instant = Instant::now();
+    let mut last_log_instant = start_instant;
+
     loop {
+        // report hashrate every 1 second
+        if Instant::now().duration_since(last_log_instant) > Duration::from_secs(1) {
+            last_log_instant = Instant::now();
+
+            let hashrate = total_hashes;
+            total_hashes = 0;
+
+            info!(
+                "worker id: {} | hashrate: {} h/s | best pow: {} | best nonce: {} | best hash: {:?}",
+                worker_id,
+                hashrate,
+                best_pow,
+                best_nonce,
+                hex::encode(best_hash_bytes.clone())
+            );
+        }
+
         if let Some(index) = nonce_index {
             if let Some(tag) = event.tags.get_mut(index) {
                 if tag.len() >= 3 {
@@ -149,18 +174,12 @@ pub fn mine_event(
             best_pow = pow;
             best_nonce = nonce;
             best_hash_bytes = hash_bytes.clone();
-
-            let _best_pow_data = serde_json::json!({
-                "best_pow": best_pow,
-                "nonce": best_nonce.to_string(),
-                "hash": hex::encode(&best_hash_bytes),
-            });
         }
 
         if pow >= difficulty {
             let event_hash = hex::encode(&hash_bytes);
             event.id = Some(event_hash.clone());
-            let total_time = start_time.elapsed().as_secs_f64();
+            let total_time = start_instant.elapsed().as_secs_f64();
             let khs = (total_hashes as f64) / 1000.0 / total_time;
 
             let result = MinedResult {
@@ -184,6 +203,7 @@ mod tests {
 
     #[test]
     fn test_mine_event() {
+        tracing_subscriber::fmt::init();
         let event = NostrEvent {
             pubkey: "e771af0b05c8e95fcdf6feb3500544d2fb1ccd384788e9f490bb3ee28e8ed66f".to_string(),
             kind: 1,
@@ -195,8 +215,9 @@ mod tests {
 
         let event_json = to_string(&event).unwrap();
 
-        let difficulty = 10;
-        let mined_result = mine_event(&event_json, difficulty, 0, 1);
+        let difficulty = 18;
+        let worker_id = 0;
+        let mined_result = mine_event(worker_id, &event_json, difficulty, 0, 1);
 
         assert_eq!(mined_result.event.pubkey, event.pubkey);
         assert_eq!(mined_result.event.kind, event.kind);
