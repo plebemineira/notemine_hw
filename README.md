@@ -1,24 +1,33 @@
-# note⛏️
-**notemine** mines nostr notes, is written in rust, and compiles to wasm. Variable difficulty and realtime hashrate. There's a [demo](https://sandwichfarm.github.io/notemine).
+# 🗒⛏ `notemine_hw` ⚡⚙️
 
-# deps 
-```
-cargo install wasm-pack
-```
+This is a fork of [`notemine`](https://github.com/sandwichfarm/notemine).
 
-# build
-```
-cargo clean
-wasm-pack build --target web --release
-```
+`notemine_hw` is a rust-based tool for mining [nostr](https://nostr.com) notes.
 
-# run demo
-```
-cd demo && npx serve 
-```
+While its parent project compiles to [WASM](https://webassembly.org/) and caters for a web-native experience,
+`notemine_hw` aims to leverage hardware acceleration for mining notes.
 
-# license
+The UI is CLI-based, allowing for:
+- Configurable PoW difficulty.
+- Realtime hashrate logging.
+- Events to be mined are provided as JSON files.
+
+## platform support
+
+- [ ] MacBook Pro GPU via [`metal-rs`](https://crates.io/crates/metal)
+- [ ] Linux GPU via [`opencl3`](https://crates.io/crates/opencl3)
+
+## dependencies
+
+xxx todo instructions to install metal and/or openCL xxx
+
+## build
+
+xxx todo xxx
+
+## run demo
+
+xxx todo xxx
+
+## license
 GNU General Public License v3.0
-
-# related
-check out [`notemine-js`](https://github.com/sandwichfarm/notemine-js) for an npm module that wraps the `wasm-bindgen` interfaces as observables for use with svelte, react and vue
