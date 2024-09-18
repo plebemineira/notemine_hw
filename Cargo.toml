@@ -8,7 +8,7 @@ license = "GPL-3.0-only"
 
 [lib]
 name = "notemine"
-path = "src/lib.rs"
+path = "src/lib/mod.rs"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
