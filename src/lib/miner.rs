@@ -12,6 +12,7 @@ pub struct NostrEvent {
     pub tags: Vec<Vec<String>>,
     pub id: Option<String>,
     pub created_at: Option<u64>,
+    pub sig: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -82,6 +83,7 @@ pub fn mine_event(
     difficulty: u32,
     start_nonce: u64,
     nonce_step: u64,
+    log_interval: u64,
 ) -> MinedResult {
     if nonce_step < 1 {
         panic!("nonce_step cannot be smaller than 1");
@@ -137,7 +139,7 @@ pub fn mine_event(
 
     loop {
         // report hashrate every 1 second
-        if Instant::now().duration_since(last_log_instant) > Duration::from_secs(1) {
+        if Instant::now().duration_since(last_log_instant) > Duration::from_secs(log_interval) {
             last_log_instant = Instant::now();
 
             let hashrate = total_hashes;
