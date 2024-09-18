@@ -18,7 +18,6 @@ pub struct NostrEvent {
 pub struct MinedResult {
     pub event: NostrEvent,
     pub total_time: f64,
-    pub khs: f64,
 }
 
 fn serialize_u64_as_number<S>(x: &u64, s: S) -> Result<S::Ok, S::Error>
@@ -180,12 +179,10 @@ pub fn mine_event(
             let event_hash = hex::encode(&hash_bytes);
             event.id = Some(event_hash.clone());
             let total_time = start_instant.elapsed().as_secs_f64();
-            let khs = (total_hashes as f64) / 1000.0 / total_time;
 
             let result = MinedResult {
                 event,
                 total_time,
-                khs,
             };
 
             return result;
