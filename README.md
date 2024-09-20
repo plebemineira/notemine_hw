@@ -78,21 +78,22 @@ $ notemine_hw --n-workers 7 -d 18 --event-json event.json -r ws://plebemineira.x
 2024-09-20T03:00:08.529897Z  INFO notemine_hw: exiting...
 ```
 
-note: the `id` and `sig` fields of `event.json` should be declared but left with an empty string.
-
-this is a limitation of the current implementation and it will hopefully be improved in the future.
+The input JSON must contain the following fields:
+- `pubkey`
+- `crated_at`
+- `kind`
+- `tags`
+- `content`
 
 for example:
 ```shell
 $ cat event.json
 {
-  "id": "",
   "pubkey": "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2",
   "created_at": 1668680774,
   "kind": 1,
   "tags": [],
   "content": "hello world",
-  "sig": ""
 }
 ```
 
