@@ -55,7 +55,13 @@ async fn main() {
     }
 
     // await for all workers until one returns
-    let (mined_result, _, _) = select_all(worker_handles).await;
+    let (mined_result, _, remaining_handles) = select_all(worker_handles).await;
+
+    // abort all remaining worker handles
+    for h in remaining_handles {
+        h.abort_handle().abort();
+    }
+
     let mined_result = mined_result.expect("expect valid MinedResult");
 
     // log total mining time
