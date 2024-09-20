@@ -1,6 +1,6 @@
 #[derive(std::fmt::Debug)]
 pub enum Error {
-    NostrError(nostr_sdk::client::Error)
+    NostrError(nostr_sdk::client::Error),
 }
 
 impl From<nostr_sdk::client::Error> for Error {

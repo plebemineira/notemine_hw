@@ -1,8 +1,8 @@
-use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
+use crate::error::Error;
 use nostr_sdk::prelude::*;
 use nostr_sdk::Event;
-use tracing::{info, error};
-use crate::error::Error;
+use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
+use tracing::{error, info};
 
 pub async fn publish(relay_url: &str, mined_event: Event) -> Result<(), Error> {
     let my_keys = Keys::generate();
@@ -21,10 +21,10 @@ pub async fn publish(relay_url: &str, mined_event: Event) -> Result<(), Error> {
     info!("connecting to relay: {}", relay_url);
     client.connect().await;
 
-   match client.send_event(mined_event).await {
-       Ok(send_output) => info!("send mined event output: {:?}", send_output),
-       Err(e) => error!("failed to send mined event: {}", e),
-   };
+    match client.send_event(mined_event).await {
+        Ok(send_output) => info!("send mined event output: {:?}", send_output),
+        Err(e) => error!("failed to send mined event: {}", e),
+    };
 
     Ok(())
 }
