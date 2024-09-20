@@ -11,10 +11,13 @@ name = "notemine"
 path = "src/lib/mod.rs"
 
 [dependencies]
+jsonrpc-core = "18.0"
+jsonrpc-http-server = "18.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10"
 hex = "0.4"
+num-bigint = "0.4"
 tracing = { version = "0.1" }
 tracing-subscriber = "0.3"
 clap = { version = "^4.5.4", features = ["derive"] }
