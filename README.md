@@ -80,6 +80,8 @@ $ notemine_hw --n-workers 7 -d 18 --event-json event.json -r ws://plebemineira.x
 
 note: the `id` and `sig` fields of `event.json` should be declared but left with an empty string.
 
+this is a limitation of the current implementation and it will hopefully be improved in the future.
+
 for example:
 ```shell
 $ cat event.json
