@@ -1,4 +1,10 @@
-# 🗒⛏ `notemine_hw` ⚡⚙️
+<h1 align="center">
+  <br>
+  <img width="200" src="notemine_hw.png">
+  <br>
+🗒⛏ notemine_hw ⚡⚙️
+<br>
+</h1>
 
 This is a fork of [`notemine`](https://github.com/sandwichfarm/notemine).
 
