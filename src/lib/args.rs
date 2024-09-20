@@ -18,6 +18,10 @@ pub struct MineArgs {
 
 #[derive(Parser, Debug)]
 pub struct SellArgs {
+    #[arg(long, help = "number of workers")]
+    pub n_workers: u64,
+    #[arg(short, long, help = "log interval (secs)")]
+    pub log_interval: u64,
     #[arg(short, long, help = "RPC port")]
     pub rpc_port: u16,
     #[arg(short, long, help = "PoW price factor")]
