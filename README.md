@@ -45,7 +45,7 @@ Options:
   -h, --help                         Print help
 
 
-$ notemine_hw --n-workers 7 -d 18 --event-json event.json -r ws://plebemineira.xyz:8080 --nsec npub1npvscr6ftxjf7dfyklqqnsvs0xyntm422zcjx2a8gx2mgx025teqvx4ghy --log-interval 2
+$ notemine_hw --n-workers 7 -d 18 --event-json event.json -r ws://plebemineira.xyz:8080 --nsec nsec13ezg388stxfnxe72nc20428r7lrxzst85d60vxynk6zr57lpxu6svjam98 --log-interval 2
 2024-09-20T03:00:01.780143Z  INFO notemine_hw: 🗒⛏ notemine_hw ⚡⚙️
 2024-09-20T03:00:01.780510Z  INFO notemine::miner: starting worker with parameters: worker id: 0 | difficulty: 18 | start_nonce: 0 | nonce_step: 2635249153387078802
 2024-09-20T03:00:01.780526Z  INFO notemine::miner: starting worker with parameters: worker id: 1 | difficulty: 18 | start_nonce: 1 | nonce_step: 2635249153387078802
