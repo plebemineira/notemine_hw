@@ -13,34 +13,31 @@ This is a fork of [`notemine`](https://github.com/sandwichfarm/notemine).
 While its parent project compiles to [WASM](https://webassembly.org/) and caters for a web-native experience,
 `notemine_hw` aims to leverage hardware acceleration for mining notes.
 
-The UI is CLI-based, allowing for:
+## UI/UX
+
+The UI/UX aims for:
 - Configurable PoW difficulty.
 - Multithreaded workers.
 - Realtime hashrate logging.
-- Events to be mined are provided as JSON files.
+- User can mine and publish their own notes, or sell PoW for zaps.
 
-## platform support
+So `notemine_hw` can be used in two different ways:
+- CLI
+- JSON-RPC
 
-- [ ] MacBook Pro GPU via [`metal-rs`](https://crates.io/crates/metal) (TODO)
-- [ ] Linux GPU via [`opencl3`](https://crates.io/crates/opencl3) (TODO)
+### CLI
 
-## dependencies
+The CLI UI assumes that the user wants to mine and publish their own notes as JSON files from disk.
 
-xxx todo instructions to install metal and/or openCL xxx
-
-## build
-
-xxx todo build instructions with cargo feature flags xxx
-
-## usage
+The `notemine_hw mine` subcommand is used for mining notes via CLI.
 
 ```shell
-$ notemine_hw -h
-Usage: notemine_hw --n-workers <N_WORKERS> --difficulty <DIFFICULTY> --event-json <EVENT_JSON> --relay-url <RELAY_URL> --log-interval <LOG_INTERVAL> --nsec <NSEC>
+$ notemine_hw mine -h
+Usage: notemine_hw mine --n-workers <N_WORKERS> --difficulty <DIFFICULTY> --event-json <EVENT_JSON> --relay-url <RELAY_URL> --log-interval <LOG_INTERVAL> --nsec <NSEC>
 
 Options:
       --n-workers <N_WORKERS>        number of workers
-  -d, --difficulty <DIFFICULTY>      difficulty
+  -d, --difficulty <DIFFICULTY>      difficulty (the number of leading zero bits in the NIP-01 id)
   -e, --event-json <EVENT_JSON>      path to event JSON file
   -r, --relay-url <RELAY_URL>        relay URL
   -l, --log-interval <LOG_INTERVAL>  log interval (secs)
@@ -84,7 +81,8 @@ $ notemine_hw --n-workers 7 -d 18 --event-json event.json -r ws://plebemineira.x
 note: the `id` and `sig` fields of `event.json` should be declared but left with an empty string.
 
 for example:
-```json
+```shell
+$ cat event.json
 {
   "id": "",
   "pubkey": "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2",
@@ -95,6 +93,123 @@ for example:
   "sig": ""
 }
 ```
+
+### JSON-RPC
+
+The JSON-RPC UI assumes the user wants to sell PoW for zaps.
+
+PoW Price is calculated according to this formula:
+
+$$ P = 2^{(d \cdot p)} $$
+
+where:
+- $P$: PoW Price [sats]
+- $p$: PoW Price factor
+- $d$: PoW difficulty
+
+![](pow_price.png)
+
+PoW sellers modulate their PoW Price factor $p$ in order to charge more or less sats according to PoW difficulty.
+
+The `notemine_hw sell` subcommand is used to sell PoW.
+
+```shell
+$ notemine_hw sell -h
+Usage: notemine_hw sell --rpc-port <RPC_PORT> --price <PRICE>
+
+Options:
+  -p, --pow-price-factor <POW_PRICE_FACTOR>  PoW price factor
+  -r, --rpc-port <RPC_PORT>                  RPC port
+  -h, --help                                 Print help
+
+```
+
+A potential PoW buyer quotes the PoW price like this:
+```shell 
+$ curl -X POST -H "Content-Type: application/json" -d '{
+   "jsonrpc": "2.0",
+   "method": "quote",
+   "params": {
+      "difficulty": 15,
+   },
+   "id": 1
+}' http://notemine_hw:1337
+{
+  "difficulty": "15",
+  "pow-price": "100",
+}
+```
+
+In the example above, the buyer needs to zap `100` sats to mine a note with difficulty `15`.
+
+The PoW buyer sends a zap (along with the event to be mined) via JSON-RPC. If the zap contains enough sats, the response contains the mined event `id`:
+```shell 
+$ curl -X POST -H "Content-Type: application/json" -d '{
+   "jsonrpc": "2.0",
+   "method": "mine",
+   "params": {
+      "event": {
+         "pubkey": "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2",
+         "created_at": 1668680774,
+         "kind": 1,
+         "tags": [],
+         "content": "hello world",
+         "difficulty": 15,
+      },
+      "zap": "f481897ee877321783bb76133622b3cc344d691bb79cd6be88f44e819c3b2306"
+   },
+   "id": 1
+}' http://notemine_hw:1337
+{
+    "error": null,
+    "id": 1,
+    "result": [
+        [
+            "id": "0001db1f0f6951f2938ecbd0712bbed5dee721daf3b36f4d35309828a309eeee",
+            "nonce": "18446744073709546934",
+            "difficulty": "15"
+        ]
+    ]
+}
+```
+
+If the zap does not carry sufficient sats, `notemine_hw` replies with an error, and the buyer lost their funds forever:
+```shell 
+$ curl -X POST -H "Content-Type: application/json" -d '{
+   "jsonrpc": "2.0",
+   "method": "mine",
+   "params": {
+      "pubkey": "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2",
+      "created_at": 1668680774,
+      "kind": 1,
+      "tags": [],
+      "content": "hello world",
+      "difficulty": 150,
+      "zap": "f481897ee877321783bb76133622b3cc344d691bb79cd6be88f44e819c3b2306"
+   },
+   "id": 1
+}' http://notemine_hw:1337
+{
+   "jsonrpc":"2.0",
+   "error":{
+      "code":-1,
+      "message":"insufficient zap"
+   }
+}
+```
+
+## platform support
+
+- [ ] MacBook Pro GPU via [`metal-rs`](https://crates.io/crates/metal) (TODO)
+- [ ] Linux GPU via [`opencl3`](https://crates.io/crates/opencl3) (TODO)
+
+## dependencies
+
+xxx todo instructions to install metal and/or openCL xxx
+
+## build
+
+xxx todo build instructions with cargo feature flags xxx
 
 ## license
 GNU General Public License v3.0
