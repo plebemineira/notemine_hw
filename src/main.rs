@@ -5,7 +5,10 @@ use notemine::args::{MineArgs, SellArgs};
 use notemine::service::{mine, serve};
 
 #[derive(Parser, Debug)]
-#[command(name = "notemine_hw", about = "nostr note miner written in rust, aiming at hardware acceleration")]
+#[command(
+    name = "notemine_hw",
+    about = "nostr note miner written in rust, aiming at hardware acceleration"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -28,12 +31,11 @@ async fn main() {
     match cli.command {
         Commands::Mine(args) => {
             mine(args).await;
-        },
+        }
         Commands::Sell(args) => {
             serve(args).await;
         }
     }
-
 
     // exit
     info!("exiting...");

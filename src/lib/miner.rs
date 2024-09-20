@@ -22,8 +22,8 @@ pub struct MinedResult {
 }
 
 fn serialize_u64_as_number<S>(x: &u64, s: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
+where
+    S: serde::Serializer,
 {
     s.serialize_u64(*x)
 }
@@ -130,9 +130,9 @@ pub fn mine_event(
 
     let mut best_pow: u32 = 0;
     #[allow(unused_assignments)]
-        let mut best_nonce: u64 = 0;
+    let mut best_nonce: u64 = 0;
     #[allow(unused_assignments)]
-        let mut best_hash_bytes: Vec<u8> = Vec::new();
+    let mut best_hash_bytes: Vec<u8> = Vec::new();
 
     let start_instant = Instant::now();
     let mut last_log_instant = start_instant;
@@ -182,10 +182,7 @@ pub fn mine_event(
             event.id = Some(event_hash.clone());
             let total_time = start_instant.elapsed().as_secs_f64();
 
-            let result = MinedResult {
-                event,
-                total_time,
-            };
+            let result = MinedResult { event, total_time };
 
             return result;
         }
