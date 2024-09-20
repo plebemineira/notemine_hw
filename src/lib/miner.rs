@@ -12,7 +12,7 @@ pub struct NostrEvent {
     pub tags: Vec<Vec<String>>,
     pub id: Option<String>,
     pub created_at: Option<u64>,
-    pub sig: String,
+    pub sig: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

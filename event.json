@@ -1,9 +1,7 @@
 {
-  "id": "",
   "pubkey": "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2",
   "created_at": 1668680774,
   "kind": 1,
   "tags": [],
-  "content": "hello world",
-  "sig": ""
+  "content": "hello world"
 }
