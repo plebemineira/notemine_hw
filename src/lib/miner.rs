@@ -1,3 +1,4 @@
+use futures::future::select_all;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
 use sha2::{Digest, Sha256};
@@ -77,7 +78,45 @@ fn get_pow(hash_bytes: &[u8]) -> u32 {
     count
 }
 
-pub fn mine_event(
+pub async fn spawn_workers(
+    n_workers: u64,
+    event_json_str: String,
+    difficulty: u32,
+    log_interval: u64,
+) -> MinedResult {
+    let nonce_step = u64::MAX / n_workers;
+
+    let mut worker_handles = Vec::new();
+    for i in 0..n_workers {
+        let event_json_str_clone = event_json_str.clone();
+        let worker_handle = tokio::spawn(async move {
+            let mined_result = mine_event(
+                i,
+                &event_json_str_clone,
+                difficulty,
+                i,
+                nonce_step,
+                log_interval,
+            );
+            return mined_result;
+        });
+        worker_handles.push(worker_handle);
+    }
+
+    // await for all workers until one returns
+    let (mined_result, _, remaining_handles) = select_all(worker_handles).await;
+
+    // abort all remaining worker handles
+    for h in remaining_handles {
+        h.abort_handle().abort();
+    }
+
+    let mined_result = mined_result.expect("expect valid MinedResult");
+
+    mined_result
+}
+
+fn mine_event(
     worker_id: u64,
     event_json: &str,
     difficulty: u32,

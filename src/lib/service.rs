@@ -1,4 +1,3 @@
-use futures::future::select_all;
 use jsonrpc_core::{Error, IoHandler, Params};
 use jsonrpc_http_server::{AccessControlAllowOrigin, DomainsValidation, ServerBuilder};
 use serde::{Deserialize, Serialize};
@@ -12,7 +11,7 @@ use nostr_sdk::{JsonUtil, Keys, NostrSigner, SecretKey, UnsignedEvent};
 
 use crate::args::{MineArgs, SellArgs};
 use crate::client::publish;
-use crate::miner::{mine_event, NostrEvent};
+use crate::miner::{spawn_workers, NostrEvent};
 use crate::sell::{pow_price, verify_zap};
 
 pub async fn mine(args: MineArgs) {
@@ -30,34 +29,13 @@ pub async fn mine(args: MineArgs) {
         serde_json::from_reader(event_reader).expect("expect a valid event JSON");
     let event_json_str = serde_json::to_string(&event_json).expect("expect a valid JSON string");
 
-    let nonce_step = u64::MAX / args.n_workers;
-
-    let mut worker_handles = Vec::new();
-    for i in 0..args.n_workers {
-        let event_json_str_clone = event_json_str.clone();
-        let worker_handle = tokio::spawn(async move {
-            let mined_result = mine_event(
-                i,
-                &event_json_str_clone,
-                args.difficulty,
-                i,
-                nonce_step,
-                args.log_interval,
-            );
-            return mined_result;
-        });
-        worker_handles.push(worker_handle);
-    }
-
-    // await for all workers until one returns
-    let (mined_result, _, remaining_handles) = select_all(worker_handles).await;
-
-    // abort all remaining worker handles
-    for h in remaining_handles {
-        h.abort_handle().abort();
-    }
-
-    let mined_result = mined_result.expect("expect valid MinedResult");
+    let mined_result = spawn_workers(
+        args.n_workers,
+        event_json_str,
+        args.difficulty,
+        args.log_interval,
+    )
+    .await;
 
     // log total mining time
     let duration = Instant::now().duration_since(start_instant).as_secs_f32();
