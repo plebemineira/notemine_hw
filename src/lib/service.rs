@@ -3,12 +3,17 @@ use std::io::BufReader;
 use std::time::Instant;
 use futures::future::select_all;
 use tracing::info;
+use jsonrpc_core::{IoHandler, Params, Error};
+use jsonrpc_http_server::{ServerBuilder, DomainsValidation, AccessControlAllowOrigin};
+use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 use nostr_sdk::{NostrSigner, Keys, SecretKey, UnsignedEvent, JsonUtil};
 
 use crate::client::publish;
 use crate::miner::{mine_event, NostrEvent};
 use crate::args::{MineArgs, SellArgs};
+use crate::sell::{pow_price, verify_zap};
 
 pub async fn mine(args: MineArgs) {
     if args.n_workers < 1 {
@@ -65,8 +70,66 @@ pub async fn mine(args: MineArgs) {
     publish(&args.relay_url, signed_mined_event).await.expect("expect successfully publish mined event");
 }
 
+#[derive(Serialize, Deserialize)]
+struct QuoteRpc {
+    difficulty: u32,
+}
+
+#[derive(Serialize, Deserialize)]
+struct MineRpc {
+    event: NostrEvent,
+    difficulty: u32,
+    zap: String, // todo: use nostr-zapper crate
+}
+
+
 pub async fn serve(args: SellArgs) {
     info!("starting JSON-RPC service to sell PoW for zaps...");
     info!("listening on JSON-RPC port: {}", args.rpc_port);
     info!("selling PoW with Price factor: {}", args.pow_price_factor);
+
+    let mut io = IoHandler::new();
+
+    io.add_method("quote", move |params: Params| async move {
+        let parsed: Result<QuoteRpc, _> = serde_json::from_value(params.parse()?).map_err(|_| Error::invalid_params("Invalid params"));
+        match parsed {
+            Ok(QuoteRpc { difficulty }) => {
+                if difficulty < 32 {
+                    let pow_price = pow_price(args.pow_price_factor, difficulty);
+                    Ok(json!({ "difficulty": difficulty, "pow-price": pow_price, "pow-price-factor": args.pow_price_factor }))
+                } else {
+                    Err(Error::invalid_params("Invalid params"))
+                }
+            },
+            Err(_) => Err(Error::invalid_params("Invalid params")),
+        }
+    });
+
+    io.add_method("mine", move |params: Params| async move {
+        let parsed: Result<MineRpc, _> = serde_json::from_value(params.parse()?).map_err(|_| Error::invalid_params("Invalid params"));
+        match parsed {
+            Ok(MineRpc { event, difficulty, zap }) => {
+                if verify_zap(zap, difficulty).await {
+                    // mine
+                    // todo
+
+                    let mock_id = "0001db1f0f6951f2938ecbd0712bbed5dee721daf3b36f4d35309828a309eeee";
+                    let mock_nonce: u64 = 18446744073709546934;
+                    let mock_difficulty = 15;
+                    Ok(json!({ "id": mock_id, "nonce": mock_nonce, "difficulty": mock_difficulty }))
+                } else {
+                    Err(Error::invalid_params("Invalid params"))
+                }
+            },
+            Err(_) => Err(Error::invalid_params("Invalid params")),
+        }
+    });
+
+    let addr = format!("127.0.0.1:{}", args.rpc_port);
+
+    let server = ServerBuilder::new(io)
+        .cors(DomainsValidation::AllowOnly(vec![AccessControlAllowOrigin::Null]))
+        .start_http(&addr.parse().expect("expect successfully start http server"))
+        .expect("Unable to start RPC server");
+    server.wait();
 }

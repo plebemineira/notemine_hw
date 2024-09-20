@@ -133,13 +133,18 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
    "jsonrpc": "2.0",
    "method": "quote",
    "params": {
-      "difficulty": 15,
+      "difficulty": 20,
    },
    "id": 1
 }' http://notemine_hw:1337
 {
-  "difficulty": "15",
-  "pow-price": "100",
+  "jsonrpc": "2.0",
+  "result": {
+    "difficulty": 20,
+    "pow-price": 1048576.0,
+    "pow-price-factor": 1.0
+  },
+  "id": 1
 }
 ```
 
@@ -157,8 +162,8 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
          "kind": 1,
          "tags": [],
          "content": "hello world",
-         "difficulty": 15,
       },
+      "difficulty": 15,
       "zap": "f481897ee877321783bb76133622b3cc344d691bb79cd6be88f44e819c3b2306"
    },
    "id": 1
