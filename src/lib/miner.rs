@@ -246,13 +246,14 @@ mod tests {
             tags: vec![],
             id: None,
             created_at: Some(1668680774),
+            sig: None,
         };
 
         let event_json = to_string(&event).unwrap();
 
         let difficulty = 18;
         let worker_id = 0;
-        let mined_result = mine_event(worker_id, &event_json, difficulty, 0, 1);
+        let mined_result = mine_event(worker_id, &event_json, difficulty, 0, 1, 1);
 
         assert_eq!(mined_result.event.pubkey, event.pubkey);
         assert_eq!(mined_result.event.kind, event.kind);
@@ -278,6 +279,7 @@ mod tests {
             tags: vec![],
             id: None,
             created_at: Some(1668680774),
+            sig: None,
         };
 
         let expected_hash = "bb9727a19e7ed120333e994ada9c3b6e4a360a71739f9ea33def6d69638fff30";
