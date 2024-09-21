@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand};
 use tracing::info;
 
 use notemine::args::{MineArgs, SellArgs};
-use notemine::service::{mine, serve};
+use notemine::service::{mine, sell};
 
 #[derive(Parser, Debug)]
 #[command(
@@ -33,7 +33,7 @@ async fn main() {
             mine(args).await;
         }
         Commands::Sell(args) => {
-            serve(args).await;
+            sell(args).await;
         }
     }
 
