@@ -182,6 +182,32 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
 }
 ```
 
+If the zap is invalid, `notemine_hw` replies with an error:
+```shell
+$ curl -X POST -H "Content-Type: application/json" -d '{
+   "jsonrpc": "2.0",
+   "method": "mine",
+   "params": {
+      "pubkey": "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2",
+      "created_at": 1668680774,
+      "kind": 1,
+      "tags": [],
+      "content": "hello world",
+      "difficulty": 150,
+      "zap": "nonsense"
+   },
+   "id": 1
+}' http://localhost:1337
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32602,
+    "message": "Invalid Zap"
+  },
+  "id": 1
+}
+```
+
 If the zap does not carry sufficient sats, `notemine_hw` replies with an error, and the buyer lost their funds forever:
 ```shell 
 $ curl -X POST -H "Content-Type: application/json" -d '{
@@ -199,11 +225,12 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
    "id": 1
 }' http://localhost:1337
 {
-   "jsonrpc":"2.0",
-   "error":{
-      "code":-1,
-      "message":"insufficient zap"
-   }
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32602,
+    "message": "Insufficient Zap"
+  },
+  "id": 1
 }
 ```
 
