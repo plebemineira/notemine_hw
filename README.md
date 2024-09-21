@@ -8,7 +8,7 @@
 
 This is a fork of [`notemine`](https://github.com/sandwichfarm/notemine).
 
-`notemine_hw` is a rust-based tool for mining [nostr](https://nostr.com) notes under [NIP13](https://github.com/nostr-protocol/nips/blob/master/13.md).
+`notemine_hw` is a rust-based tool for mining [nostr](https://nostr.com) notes under [`NIP-13`](https://github.com/nostr-protocol/nips/blob/master/13.md).
 
 While its parent project compiles to [WASM](https://webassembly.org/) and caters for a web-native experience,
 `notemine_hw` aims to leverage hardware acceleration for mining notes.
