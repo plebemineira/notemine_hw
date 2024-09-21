@@ -4,7 +4,11 @@ pub fn pow_price(pow_price_factor: f64, difficulty: u32) -> f64 {
     2f64.powf(pow_price_factor * (difficulty as f64))
 }
 
-pub async fn verify_zap(_zap: String, pow_price_factor: f64, difficulty: u32) -> Result<(), ZapError> {
+pub async fn verify_zap(
+    _zap: String,
+    pow_price_factor: f64,
+    difficulty: u32,
+) -> Result<(), ZapError> {
     let _pow_price = pow_price(pow_price_factor, difficulty);
 
     // todo: check zap is valid
