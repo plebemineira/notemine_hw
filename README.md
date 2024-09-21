@@ -25,6 +25,8 @@ So `notemine_hw` can be used in two different ways:
 - CLI
 - JSON-RPC
 
+![](./diagram.png)
+
 ### CLI
 
 The CLI UI assumes that the user wants to mine and publish their own notes as JSON files from disk.
