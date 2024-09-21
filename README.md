@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img width="200" src="notemine_hw.png">
+  <img width="200" src="img/notemine_hw.png">
   <br>
 🗒⛏ notemine_hw ⚡⚙️
 <br>
@@ -25,7 +25,7 @@ So `notemine_hw` can be used in two different ways:
 - CLI
 - JSON-RPC
 
-![](./diagram.png)
+![](./img/diagram.png)
 
 ### CLI
 
@@ -112,7 +112,7 @@ where:
 - $p$: PoW Price factor
 - $d$: PoW difficulty
 
-![](pow_price.png)
+![](./img/pow_price.png)
 
 PoW sellers modulate their PoW Price factor $p$ in order to charge more or less sats according to PoW difficulty.
 
