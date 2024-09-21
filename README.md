@@ -208,7 +208,7 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
 }
 ```
 
-If the zap does not carry sufficient sats, `notemine_hw` replies with an error, and the buyer lost their funds forever:
+If the zap does not carry sufficient sats to cover for the PoW price of the requested difficulty, `notemine_hw` replies with an error.
 ```shell 
 $ curl -X POST -H "Content-Type: application/json" -d '{
    "jsonrpc": "2.0",
