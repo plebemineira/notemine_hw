@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img width="200" src="img/notemine_hw.png">
+  <img width="200" src="./img/logo.png">
   <br>
 🗒⛏ notemine_hw ⚡⚙️
 <br>
