@@ -209,12 +209,11 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
 
 ## platform support
 
-- [ ] MacBook Pro GPU via [`metal-rs`](https://crates.io/crates/metal) (TODO)
 - [ ] Linux GPU via [`opencl3`](https://crates.io/crates/opencl3) (TODO)
 
 ## dependencies
 
-xxx todo instructions to install metal and/or openCL xxx
+xxx todo instructions to install openCL xxx
 
 ## build
 
