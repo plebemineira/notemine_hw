@@ -177,11 +177,11 @@ fn mine_event(
     let mut last_log_instant = start_instant;
 
     loop {
-        // report hashrate every 1 second
+        // report hashrate every log_interval secs
         if Instant::now().duration_since(last_log_instant) > Duration::from_secs(log_interval) {
             last_log_instant = Instant::now();
 
-            let hashrate = total_hashes;
+            let hashrate = total_hashes / log_interval;
             total_hashes = 0;
 
             info!(
