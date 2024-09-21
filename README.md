@@ -137,7 +137,7 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
       "difficulty": 20,
    },
    "id": 1
-}' http://notemine_hw:1337
+}' http://localhost:1337
 {
   "jsonrpc": "2.0",
   "result": {
@@ -168,7 +168,7 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
       "zap": "f481897ee877321783bb76133622b3cc344d691bb79cd6be88f44e819c3b2306"
    },
    "id": 1
-}' http://notemine_hw:1337
+}' http://localhost:1337
 {
     "error": null,
     "id": 1,
@@ -197,7 +197,7 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
       "zap": "f481897ee877321783bb76133622b3cc344d691bb79cd6be88f44e819c3b2306"
    },
    "id": 1
-}' http://notemine_hw:1337
+}' http://localhost:1337
 {
    "jsonrpc":"2.0",
    "error":{
