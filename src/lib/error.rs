@@ -8,3 +8,8 @@ impl From<nostr_sdk::client::Error> for Error {
         Error::NostrError(e)
     }
 }
+
+pub enum ZapError {
+    InsufficientZap,
+    InvalidZap,
+}

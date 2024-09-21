@@ -10,6 +10,7 @@ use tracing::info;
 use nostr_sdk::{JsonUtil, Keys, NostrSigner, SecretKey, UnsignedEvent};
 
 use crate::args::{MineArgs, SellArgs};
+use crate::error::ZapError;
 use crate::client::publish;
 use crate::miner::{spawn_workers, NostrEvent};
 use crate::sell::{pow_price, verify_zap};
@@ -107,35 +108,41 @@ pub async fn serve(args: SellArgs) {
                 difficulty,
                 zap,
             }) => {
-                if verify_zap(zap, args.pow_price_factor, difficulty).await {
-                    // mine
-                    let start_instant = Instant::now();
+                match verify_zap(zap, args.pow_price_factor, difficulty).await {
+                    Ok(()) => {
+                        // mine
+                        let start_instant = Instant::now();
 
-                    let event_json_str =
-                        serde_json::to_string(&event).expect("expect a valid JSON string");
-                    let mined_result = spawn_workers(
-                        args.n_workers,
-                        event_json_str,
-                        difficulty,
-                        args.log_interval,
-                    ).await;
+                        let event_json_str =
+                            serde_json::to_string(&event).expect("expect a valid JSON string");
+                        let mined_result = spawn_workers(
+                            args.n_workers,
+                            event_json_str,
+                            difficulty,
+                            args.log_interval,
+                        ).await;
 
-                    let mined_id = mined_result.event.id.clone().expect("expect mined id");
-                    let mut nonce: Option<u64> = None;
-                    for tag in &mined_result.event.tags {
-                        if tag.contains(&"nonce".to_string()) {
-                            nonce = Some(tag[1].parse::<u64>().expect("expect valid u64"))
-                        }
-                    };
-                    // log total mining time
-                    let duration = Instant::now().duration_since(start_instant).as_secs_f32();
+                        let mined_id = mined_result.event.id.clone().expect("expect mined id");
+                        let mut nonce: Option<u64> = None;
+                        for tag in &mined_result.event.tags {
+                            if tag.contains(&"nonce".to_string()) {
+                                nonce = Some(tag[1].parse::<u64>().expect("expect valid u64"))
+                            }
+                        };
+                        // log total mining time
+                        let duration = Instant::now().duration_since(start_instant).as_secs_f32();
 
-                    info!("successfully mined event in {} seconds", duration);
-                    info!("{:?}", mined_result);
+                        info!("successfully mined event in {} seconds", duration);
+                        info!("{:?}", mined_result);
 
-                    Ok(json!({ "id": mined_id, "nonce": nonce, "difficulty": difficulty }))
-                } else {
-                    Err(Error::invalid_params("Invalid params"))
+                        return Ok(json!({ "id": mined_id, "nonce": nonce, "difficulty": difficulty }));
+                    },
+                    Err(ZapError::InsufficientZap) => {
+                        return Err(Error::invalid_params("Insufficient Zap"))
+                    },
+                    Err(ZapError::InvalidZap) => {
+                        return Err(Error::invalid_params("Invalid Zap"))
+                    }
                 }
             }
             Err(_) => Err(Error::invalid_params("Invalid params")),
