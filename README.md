@@ -151,7 +151,7 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
 }
 ```
 
-In the example above, the buyer needs to zap `100` sats to mine a note with difficulty `15`.
+In the example above, the buyer needs to zap `1048576.0` sats to mine a note with difficulty `20`, because `pow-price-factor` is set to `1.0`.
 
 The PoW buyer sends a zap (along with the event to be mined) via JSON-RPC. If the zap contains enough sats, the response contains the mined event `id`:
 ```shell 
@@ -166,21 +166,19 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
          "tags": [],
          "content": "hello world",
       },
-      "difficulty": 15,
+      "difficulty": 20,
       "zap": "f481897ee877321783bb76133622b3cc344d691bb79cd6be88f44e819c3b2306"
    },
    "id": 1
 }' http://localhost:1337
 {
-    "error": null,
-    "id": 1,
-    "result": [
-        [
-            "id": "0001db1f0f6951f2938ecbd0712bbed5dee721daf3b36f4d35309828a309eeee",
-            "nonce": "18446744073709546934",
-            "difficulty": "15"
-        ]
-    ]
+  "jsonrpc": "2.0",
+  "result": {
+    "id": "000006e73a6b1c2602fc41444c7c9fe382061a5e6616bf533379a043c8c77c75",
+    "nonce": 7378697629483745322,
+    "difficulty": 20
+  },
+  "id": 1
 }
 ```
 
