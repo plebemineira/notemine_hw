@@ -109,13 +109,31 @@ pub async fn serve(args: SellArgs) {
             }) => {
                 if verify_zap(zap, difficulty).await {
                     // mine
-                    // todo
+                    let start_instant = Instant::now();
 
-                    let mock_id =
-                        "0001db1f0f6951f2938ecbd0712bbed5dee721daf3b36f4d35309828a309eeee";
-                    let mock_nonce: u64 = 18446744073709546934;
-                    let mock_difficulty = 15;
-                    Ok(json!({ "id": mock_id, "nonce": mock_nonce, "difficulty": mock_difficulty }))
+                    let event_json_str =
+                        serde_json::to_string(&event).expect("expect a valid JSON string");
+                    let mined_result = spawn_workers(
+                        args.n_workers,
+                        event_json_str,
+                        difficulty,
+                        args.log_interval,
+                    ).await;
+
+                    let mined_id = mined_result.event.id.clone().expect("expect mined id");
+                    let mut nonce: Option<u64> = None;
+                    for tag in &mined_result.event.tags {
+                        if tag.contains(&"nonce".to_string()) {
+                            nonce = Some(tag[1].parse::<u64>().expect("expect valid u64"))
+                        }
+                    };
+                    // log total mining time
+                    let duration = Instant::now().duration_since(start_instant).as_secs_f32();
+
+                    info!("successfully mined event in {} seconds", duration);
+                    info!("{:?}", mined_result);
+
+                    Ok(json!({ "id": mined_id, "nonce": nonce, "difficulty": difficulty }))
                 } else {
                     Err(Error::invalid_params("Invalid params"))
                 }

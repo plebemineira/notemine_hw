@@ -118,13 +118,14 @@ The `notemine_hw sell` subcommand is used to sell PoW.
 
 ```shell
 $ notemine_hw sell -h
-Usage: notemine_hw sell --rpc-port <RPC_PORT> --price <PRICE>
+Usage: notemine_hw sell --n-workers <N_WORKERS> --log-interval <LOG_INTERVAL> --rpc-port <RPC_PORT> --pow-price-factor <POW_PRICE_FACTOR>
 
 Options:
-  -p, --pow-price-factor <POW_PRICE_FACTOR>  PoW price factor
+      --n-workers <N_WORKERS>                number of workers
+  -l, --log-interval <LOG_INTERVAL>          log interval (secs)
   -r, --rpc-port <RPC_PORT>                  RPC port
+  -p, --pow-price-factor <POW_PRICE_FACTOR>  PoW price factor
   -h, --help                                 Print help
-
 ```
 
 A potential PoW buyer quotes the PoW price like this:
