@@ -10,8 +10,8 @@ use tracing::info;
 use nostr_sdk::{JsonUtil, Keys, NostrSigner, SecretKey, UnsignedEvent};
 
 use crate::args::{MineArgs, SellArgs};
-use crate::error::ZapError;
 use crate::client::publish;
+use crate::error::ZapError;
 use crate::miner::{spawn_workers, NostrEvent};
 use crate::sell::{pow_price, verify_zap};
 
@@ -120,7 +120,8 @@ pub async fn serve(args: SellArgs) {
                             event_json_str,
                             difficulty,
                             args.log_interval,
-                        ).await;
+                        )
+                        .await;
 
                         let mined_id = mined_result.event.id.clone().expect("expect mined id");
                         let mut nonce: Option<u64> = None;
@@ -128,21 +129,21 @@ pub async fn serve(args: SellArgs) {
                             if tag.contains(&"nonce".to_string()) {
                                 nonce = Some(tag[1].parse::<u64>().expect("expect valid u64"))
                             }
-                        };
+                        }
                         // log total mining time
                         let duration = Instant::now().duration_since(start_instant).as_secs_f32();
 
                         info!("successfully mined event in {} seconds", duration);
                         info!("{:?}", mined_result);
 
-                        return Ok(json!({ "id": mined_id, "nonce": nonce, "difficulty": difficulty }));
-                    },
+                        return Ok(
+                            json!({ "id": mined_id, "nonce": nonce, "difficulty": difficulty }),
+                        );
+                    }
                     Err(ZapError::InsufficientZap) => {
                         return Err(Error::invalid_params("Insufficient Zap"))
-                    },
-                    Err(ZapError::InvalidZap) => {
-                        return Err(Error::invalid_params("Invalid Zap"))
                     }
+                    Err(ZapError::InvalidZap) => return Err(Error::invalid_params("Invalid Zap")),
                 }
             }
             Err(_) => Err(Error::invalid_params("Invalid params")),
