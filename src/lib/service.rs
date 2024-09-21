@@ -76,7 +76,7 @@ struct MineRpc {
     zap: String, // todo: use nostr-zapper crate
 }
 
-pub async fn serve(args: SellArgs) {
+pub async fn sell(args: SellArgs) {
     info!("starting JSON-RPC service to sell PoW for zaps...");
     info!("listening on JSON-RPC port: {}", args.rpc_port);
     info!("selling PoW with Price factor: {}", args.pow_price_factor);
