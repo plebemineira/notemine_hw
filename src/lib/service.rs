@@ -160,3 +160,60 @@ pub async fn sell(args: SellArgs) {
         .expect("Unable to start RPC server");
     server.wait();
 }
+
+#[cfg(test)]
+mod test {
+    use crate::args::SellArgs;
+    use crate::service::sell;
+    use std::env;
+    use std::time::Duration;
+    use std::thread::sleep;
+    use reqwest::Client;
+
+    #[tokio::test]
+    async fn test_sell_quote_rpc() {
+        tracing_subscriber::fmt::init();
+
+        let sell_args = SellArgs {
+            n_workers: 1,
+            log_interval: 1,
+            rpc_port: 1337,
+            pow_price_factor: 1.0,
+        };
+
+        let sell_handle = tokio::spawn(sell(sell_args));
+
+        println!("aaaa");
+        // wait for JSON-RPC bootstrap
+        // sleep(Duration::from_secs(10));
+
+        println!("bbbb");
+
+        // let api_url = env::var("API_URL").unwrap_or_else(|_| "http://localhost:1327".to_string());
+        // let client = Client::new();
+        //
+        // let request = serde_json::json!({
+        //     "jsonrpc": "2.0",
+        //     "method": "get_data",
+        //     "params": [],
+        //     "id": 1,
+        // });
+        //
+        // // Send request to the JSON-RPC endpoint
+        // let response = client.post(&api_url)
+        //     .json(&request)
+        //     .send()
+        //     .await
+        //     .expect("Failed to send request");
+        //
+        // sell_handle.await;
+        //
+        // println!("aaaa");
+        //
+        // // Validate response
+        // assert!(response.status().is_success());
+        // let response_json: serde_json::Value = response.json().await.expect("Failed to parse response");
+        // assert_eq!(response_json["result"], serde_json::json!("expected_result"));
+
+    }
+}
