@@ -107,7 +107,7 @@ pub async fn serve(args: SellArgs) {
                 difficulty,
                 zap,
             }) => {
-                if verify_zap(zap, difficulty).await {
+                if verify_zap(zap, args.pow_price_factor, difficulty).await {
                     // mine
                     let start_instant = Instant::now();
 
