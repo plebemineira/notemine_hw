@@ -89,7 +89,7 @@ pub async fn spawn_workers(
     let mut worker_handles = Vec::new();
     for i in 0..n_workers {
         let event_json_str_clone = event_json_str.clone();
-        let start_nonce = i*nonce_step;
+        let start_nonce = i * nonce_step;
         let worker_handle = tokio::spawn(async move {
             let mined_result = mine_event(
                 i,
