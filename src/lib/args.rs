@@ -4,14 +4,14 @@ use clap::Parser;
 pub struct PublishArgs {
     #[arg(long, help = "number of workers")]
     pub n_workers: u64,
+    #[arg(short, long, help = "log interval (secs)")]
+    pub log_interval: u64,
     #[arg(short, long, help = "difficulty")]
     pub difficulty: u32,
     #[arg(short, long, help = "path to event JSON file")]
     pub event_json: String,
     #[arg(short, long, help = "relay URL")]
     pub relay_url: String,
-    #[arg(short, long, help = "log interval (secs)")]
-    pub log_interval: u64,
     #[arg(long, help = "nsec")]
     pub nsec: String,
 }

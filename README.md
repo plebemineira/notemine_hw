@@ -34,20 +34,19 @@ The CLI UI assumes that the user wants to mine and publish their own notes as JS
 The `notemine_hw publish` subcommand is used for mining notes via CLI.
 
 ```shell
-$ notemine_hw publish:wq -h
-Usage: notemine_hw publish --n-workers <N_WORKERS> --difficulty <DIFFICULTY> --event-json <EVENT_JSON> --relay-url <RELAY_URL> --log-interval <LOG_INTERVAL> --nsec <NSEC>
+$ notemine_hw publish -h
+Usage: notemine_hw publish --n-workers <N_WORKERS> --log-interval <LOG_INTERVAL> --difficulty <DIFFICULTY> --event-json <EVENT_JSON> --relay-url <RELAY_URL> --nsec <NSEC>
 
 Options:
       --n-workers <N_WORKERS>        number of workers
-  -d, --difficulty <DIFFICULTY>      difficulty (the number of leading zero bits in the NIP-01 id)
+  -l, --log-interval <LOG_INTERVAL>  log interval (secs)
+  -d, --difficulty <DIFFICULTY>      difficulty
   -e, --event-json <EVENT_JSON>      path to event JSON file
   -r, --relay-url <RELAY_URL>        relay URL
-  -l, --log-interval <LOG_INTERVAL>  log interval (secs)
       --nsec <NSEC>                  nsec
   -h, --help                         Print help
 
-
-$ notemine_hw publish --n-workers 7 -d 18 --event-json event.json -r ws://plebemineira.xyz:8080 --nsec nsec13ezg388stxfnxe72nc20428r7lrxzst85d60vxynk6zr57lpxu6svjam98 --log-interval 2
+$ notemine_hw publish --n-workers 7 --log-interval 2 -d 18 --event-json event.json -r ws://plebemineira.xyz:8080 --nsec nsec13ezg388stxfnxe72nc20428r7lrxzst85d60vxynk6zr57lpxu6svjam98
 2024-09-20T03:00:01.780143Z  INFO notemine_hw: 🗒⛏ notemine_hw ⚡⚙️
 2024-09-20T03:00:01.780510Z  INFO notemine::miner: starting worker with parameters: worker id: 0 | difficulty: 18 | start_nonce: 0 | nonce_step: 2635249153387078802
 2024-09-20T03:00:01.780526Z  INFO notemine::miner: starting worker with parameters: worker id: 1 | difficulty: 18 | start_nonce: 1 | nonce_step: 2635249153387078802
