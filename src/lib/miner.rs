@@ -89,13 +89,13 @@ pub async fn spawn_workers(
     let mut worker_handles = Vec::new();
     for i in 0..n_workers {
         let event_json_str_clone = event_json_str.clone();
+        let start_nonce = i*nonce_step;
         let worker_handle = tokio::spawn(async move {
             let mined_result = mine_event(
                 i,
                 &event_json_str_clone,
                 difficulty,
-                i,
-                nonce_step,
+                start_nonce,
                 log_interval,
             );
             return mined_result;
@@ -121,13 +121,8 @@ fn mine_event(
     event_json: &str,
     difficulty: u32,
     start_nonce: u64,
-    nonce_step: u64,
     log_interval: u64,
 ) -> MinedResult {
-    if nonce_step < 1 {
-        panic!("nonce_step cannot be smaller than 1");
-    }
-
     let mut event: NostrEvent = match serde_json::from_str(event_json) {
         Ok(e) => e,
         Err(err) => {
@@ -160,8 +155,8 @@ fn mine_event(
     }
 
     info!(
-        "starting worker with parameters: worker id: {} | difficulty: {} | start_nonce: {} | nonce_step: {}",
-        worker_id, difficulty, start_nonce, nonce_step
+        "starting worker with parameters: worker id: {} | difficulty: {} | start_nonce: {}",
+        worker_id, difficulty, start_nonce
     );
 
     let mut nonce: u64 = start_nonce;
@@ -226,7 +221,7 @@ fn mine_event(
             return result;
         }
 
-        nonce = nonce.wrapping_add(nonce_step);
+        nonce = nonce.wrapping_add(1);
         total_hashes += 1;
     }
 }
@@ -253,7 +248,7 @@ mod tests {
 
         let difficulty = 18;
         let worker_id = 0;
-        let mined_result = mine_event(worker_id, &event_json, difficulty, 0, 1, 1);
+        let mined_result = mine_event(worker_id, &event_json, difficulty, 0, 1);
 
         assert_eq!(mined_result.event.pubkey, event.pubkey);
         assert_eq!(mined_result.event.kind, event.kind);
