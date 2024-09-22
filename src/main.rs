@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use tracing::info;
 
-use notemine::args::{MineArgs, SellArgs};
+use notemine::args::{PublishArgs, SellArgs};
 use notemine::service::{mine, sell};
 
 #[derive(Parser, Debug)]
@@ -16,7 +16,7 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    Mine(MineArgs),
+    Publish(PublishArgs),
     Sell(SellArgs),
 }
 
@@ -29,7 +29,7 @@ async fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Mine(args) => {
+        Commands::Publish(args) => {
             mine(args).await;
         }
         Commands::Sell(args) => {

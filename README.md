@@ -22,8 +22,8 @@ The UI/UX aims for:
 - User can mine and publish their own notes, or sell PoW for zaps.
 
 So `notemine_hw` can be used in two different ways:
-- CLI
-- JSON-RPC
+- CLI (via `publish` subcommand)
+- JSON-RPC (via `sell` subcommand)
 
 ![](./img/diagram.png)
 
@@ -31,11 +31,11 @@ So `notemine_hw` can be used in two different ways:
 
 The CLI UI assumes that the user wants to mine and publish their own notes as JSON files from disk.
 
-The `notemine_hw mine` subcommand is used for mining notes via CLI.
+The `notemine_hw publish` subcommand is used for mining notes via CLI.
 
 ```shell
-$ notemine_hw mine -h
-Usage: notemine_hw mine --n-workers <N_WORKERS> --difficulty <DIFFICULTY> --event-json <EVENT_JSON> --relay-url <RELAY_URL> --log-interval <LOG_INTERVAL> --nsec <NSEC>
+$ notemine_hw publish:wq -h
+Usage: notemine_hw publish --n-workers <N_WORKERS> --difficulty <DIFFICULTY> --event-json <EVENT_JSON> --relay-url <RELAY_URL> --log-interval <LOG_INTERVAL> --nsec <NSEC>
 
 Options:
       --n-workers <N_WORKERS>        number of workers
@@ -47,7 +47,7 @@ Options:
   -h, --help                         Print help
 
 
-$ notemine_hw --n-workers 7 -d 18 --event-json event.json -r ws://plebemineira.xyz:8080 --nsec nsec13ezg388stxfnxe72nc20428r7lrxzst85d60vxynk6zr57lpxu6svjam98 --log-interval 2
+$ notemine_hw publish --n-workers 7 -d 18 --event-json event.json -r ws://plebemineira.xyz:8080 --nsec nsec13ezg388stxfnxe72nc20428r7lrxzst85d60vxynk6zr57lpxu6svjam98 --log-interval 2
 2024-09-20T03:00:01.780143Z  INFO notemine_hw: 🗒⛏ notemine_hw ⚡⚙️
 2024-09-20T03:00:01.780510Z  INFO notemine::miner: starting worker with parameters: worker id: 0 | difficulty: 18 | start_nonce: 0 | nonce_step: 2635249153387078802
 2024-09-20T03:00:01.780526Z  INFO notemine::miner: starting worker with parameters: worker id: 1 | difficulty: 18 | start_nonce: 1 | nonce_step: 2635249153387078802

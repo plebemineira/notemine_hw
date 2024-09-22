@@ -9,13 +9,13 @@ use tracing::info;
 
 use nostr_sdk::{JsonUtil, Keys, NostrSigner, SecretKey, UnsignedEvent};
 
-use crate::args::{MineArgs, SellArgs};
+use crate::args::{PublishArgs, SellArgs};
 use crate::client::publish;
 use crate::error::ZapError;
 use crate::miner::{spawn_workers, NostrEvent};
 use crate::sell::{pow_price, verify_zap};
 
-pub async fn mine(args: MineArgs) {
+pub async fn mine(args: PublishArgs) {
     if args.n_workers < 1 {
         panic!("n_workers needs to be at least 1");
     }

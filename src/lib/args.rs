@@ -1,7 +1,7 @@
 use clap::Parser;
 
 #[derive(Parser, Debug)]
-pub struct MineArgs {
+pub struct PublishArgs {
     #[arg(long, help = "number of workers")]
     pub n_workers: u64,
     #[arg(short, long, help = "difficulty")]
