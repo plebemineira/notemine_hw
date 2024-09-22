@@ -1,3 +1,4 @@
+use circular_buffer::CircularBuffer;
 use futures::future::select_all;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
@@ -116,6 +117,17 @@ pub async fn spawn_workers(
     mined_result
 }
 
+// hashrate_buf is useful for averaging hashrate
+const HASHRATE_BUF_SIZE: usize = 10;
+
+fn hashrate_avg(hashrate_buf: CircularBuffer<HASHRATE_BUF_SIZE, u64>) -> f32 {
+    let mut hashrate_sum = 0;
+    for hashrate_log in &hashrate_buf {
+        hashrate_sum += hashrate_log;
+    }
+    let hashrate_avg = hashrate_sum as f32 / hashrate_buf.len() as f32;
+    hashrate_avg
+}
 fn mine_event(
     worker_id: u64,
     event_json: &str,
@@ -171,18 +183,23 @@ fn mine_event(
     let start_instant = Instant::now();
     let mut last_log_instant = start_instant;
 
+    let mut hashrate_buf = CircularBuffer::<HASHRATE_BUF_SIZE, u64>::new();
+
     loop {
         // report hashrate every log_interval secs
         if Instant::now().duration_since(last_log_instant) > Duration::from_secs(log_interval) {
             last_log_instant = Instant::now();
 
             let hashrate = total_hashes / log_interval;
+            hashrate_buf.push_back(hashrate);
             total_hashes = 0;
 
+            let hashrate_avg = hashrate_avg(hashrate_buf.clone());
+
             info!(
-                "worker id: {} | hashrate: {} h/s | best pow: {} | best nonce: {} | best hash: {:?}",
+                "worker id: {} | hashrate: {:.01} h/s | best pow: {} | best nonce: {} | best hash: {:?}",
                 worker_id,
-                hashrate,
+                hashrate_avg,
                 best_pow,
                 best_nonce,
                 hex::encode(best_hash_bytes.clone())
