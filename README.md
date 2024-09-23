@@ -81,10 +81,11 @@ $ notemine_hw publish --n-workers 7 --log-interval 2 -d 18 --event-json event.js
 
 The input JSON must contain the following fields:
 - `pubkey`
-- `crated_at`
 - `kind`
 - `tags`
 - `content`
+
+Optionally, the `created_at` field can also be provided. If not, the current UNIX timestamp is used.
 
 for example:
 ```shell
