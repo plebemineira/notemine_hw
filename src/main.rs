@@ -20,7 +20,7 @@ enum Commands {
     Sell(SellArgs),
 }
 
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread", worker_threads = 100)] // todo use --n-workers to define this
 async fn main() {
     tracing_subscriber::fmt::init();
 
