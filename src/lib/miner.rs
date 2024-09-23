@@ -81,7 +81,7 @@ fn get_pow(hash_bytes: &[u8]) -> u32 {
 
 pub async fn spawn_workers(
     n_workers: u64,
-    event_json_str: String,
+    event: NostrEvent,
     difficulty: u32,
     log_interval: u64,
 ) -> MinedResult {
@@ -89,12 +89,12 @@ pub async fn spawn_workers(
 
     let mut worker_handles = Vec::new();
     for i in 0..n_workers {
-        let event_json_str_clone = event_json_str.clone();
+        let event_clone = event.clone();
         let start_nonce = i * nonce_step;
         let worker_handle = tokio::spawn(async move {
             let mined_result = mine_event(
                 i,
-                &event_json_str_clone,
+                event_clone,
                 difficulty,
                 start_nonce,
                 log_interval,
@@ -130,17 +130,11 @@ fn hashrate_avg(hashrate_buf: CircularBuffer<HASHRATE_BUF_SIZE, u64>) -> f32 {
 }
 fn mine_event(
     worker_id: u64,
-    event_json: &str,
+    mut event: NostrEvent,
     difficulty: u32,
     start_nonce: u64,
     log_interval: u64,
 ) -> MinedResult {
-    let mut event: NostrEvent = match serde_json::from_str(event_json) {
-        Ok(e) => e,
-        Err(err) => {
-            panic!("Invalid event JSON: {}", err)
-        }
-    };
 
     if event.created_at.is_none() {
         let current_timestamp = SystemTime::now()
@@ -261,11 +255,9 @@ mod tests {
             sig: None,
         };
 
-        let event_json = to_string(&event).unwrap();
-
         let difficulty = 18;
         let worker_id = 0;
-        let mined_result = mine_event(worker_id, &event_json, difficulty, 0, 1);
+        let mined_result = mine_event(worker_id, event.clone(), difficulty, 0, 1);
 
         assert_eq!(mined_result.event.pubkey, event.pubkey);
         assert_eq!(mined_result.event.kind, event.kind);

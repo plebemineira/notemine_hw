@@ -26,13 +26,12 @@ pub async fn mine(args: PublishArgs) {
 
     let event_file = File::open("event.json").expect("expect a valid filepath");
     let event_reader = BufReader::new(event_file);
-    let event_json: NostrEvent =
+    let event: NostrEvent =
         serde_json::from_reader(event_reader).expect("expect a valid event JSON");
-    let event_json_str = serde_json::to_string(&event_json).expect("expect a valid JSON string");
 
     let mined_result = spawn_workers(
         args.n_workers,
-        event_json_str,
+        event,
         args.difficulty,
         args.log_interval,
     )
@@ -113,11 +112,9 @@ pub async fn sell(args: SellArgs) {
                         // mine
                         let start_instant = Instant::now();
 
-                        let event_json_str =
-                            serde_json::to_string(&event).expect("expect a valid JSON string");
                         let mined_result = spawn_workers(
                             args.n_workers,
-                            event_json_str,
+                            event,
                             difficulty,
                             args.log_interval,
                         )
