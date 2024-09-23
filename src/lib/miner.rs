@@ -1,12 +1,12 @@
 use circular_buffer::CircularBuffer;
-use futures::future::select_all;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
 use sha2::{Digest, Sha256};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use tracing::info;
+use tokio::sync::mpsc::{channel, Sender};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct PoWEvent {
     pub pubkey: String,
     pub kind: u32,
@@ -17,7 +17,7 @@ pub struct PoWEvent {
     pub sig: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct MinedResult {
     pub event: PoWEvent,
     pub total_time: f64,
@@ -87,32 +87,29 @@ pub async fn spawn_workers(
 ) -> MinedResult {
     let nonce_step = u64::MAX / n_workers;
 
-    let mut worker_handles = Vec::new();
+    let (result_tx, mut result_rx) = channel(1);
+
     for i in 0..n_workers {
         let event_clone = event.clone();
+        let result_tx_clone = result_tx.clone();
         let start_nonce = i * nonce_step;
-        let worker_handle = tokio::spawn(async move {
+        tokio::spawn(async move {
             let mined_result = mine_event(
                 i,
                 event_clone,
                 difficulty,
                 start_nonce,
                 log_interval,
-            );
+                result_tx_clone
+            ).await;
             return mined_result;
         });
-        worker_handles.push(worker_handle);
     }
 
-    // await for all workers until one returns
-    let (mined_result, _, remaining_handles) = select_all(worker_handles).await;
-
-    // abort all remaining worker handles
-    for h in remaining_handles {
-        h.abort_handle().abort();
-    }
-
-    let mined_result = mined_result.expect("expect valid MinedResult");
+    let mined_result = tokio::spawn(async move {
+        let result = result_rx.recv().await.expect("expect result");
+        result
+    }).await.expect("expect successfully return result");
 
     mined_result
 }
@@ -128,12 +125,13 @@ fn hashrate_avg(hashrate_buf: CircularBuffer<HASHRATE_BUF_SIZE, u64>) -> f32 {
     let hashrate_avg = hashrate_sum as f32 / hashrate_buf.len() as f32;
     hashrate_avg
 }
-fn mine_event(
+async fn mine_event(
     worker_id: u64,
     mut event: PoWEvent,
     difficulty: u32,
     start_nonce: u64,
     log_interval: u64,
+    result_tx: Sender<MinedResult>
 ) -> MinedResult {
 
     if event.created_at.is_none() {
@@ -180,6 +178,9 @@ fn mine_event(
     let mut hashrate_buf = CircularBuffer::<HASHRATE_BUF_SIZE, u64>::new();
 
     loop {
+        if result_tx.is_closed() {
+            break;
+        }
         // report hashrate every log_interval secs
         if Instant::now().duration_since(last_log_instant) > Duration::from_secs(log_interval) {
             last_log_instant = Instant::now();
@@ -227,23 +228,30 @@ fn mine_event(
             event.id = Some(event_hash.clone());
             let total_time = start_instant.elapsed().as_secs_f64();
 
-            let result = MinedResult { event, total_time };
+            let result = MinedResult { event: event.clone(), total_time };
 
-            return result;
+            // if another worker found a solution first, result_rx will close
+            if !result_tx.is_closed() {
+                result_tx.send(result).await.expect("expect successful send result");
+            }
+            break;
         }
 
         nonce = nonce.wrapping_add(1);
         total_hashes += 1;
     }
+
+    return MinedResult::default()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use hex::FromHex;
+    use tokio::sync::mpsc::channel;
 
-    #[test]
-    fn test_mine_event() {
+    #[tokio::test]
+    async fn test_mine_event() {
         tracing_subscriber::fmt::init();
         let event = PoWEvent {
             pubkey: "e771af0b05c8e95fcdf6feb3500544d2fb1ccd384788e9f490bb3ee28e8ed66f".to_string(),
@@ -257,7 +265,10 @@ mod tests {
 
         let difficulty = 18;
         let worker_id = 0;
-        let mined_result = mine_event(worker_id, event.clone(), difficulty, 0, 1);
+
+        let (result_tx, result_rx) = channel(1);
+
+        let mined_result = mine_event(worker_id, event.clone(), difficulty, 0, 1, result_tx).await;
 
         assert_eq!(mined_result.event.pubkey, event.pubkey);
         assert_eq!(mined_result.event.kind, event.kind);
