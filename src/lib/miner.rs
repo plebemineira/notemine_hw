@@ -7,7 +7,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use tracing::info;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct NostrEvent {
+pub struct PoWEvent {
     pub pubkey: String,
     pub kind: u32,
     pub content: String,
@@ -19,7 +19,7 @@ pub struct NostrEvent {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MinedResult {
-    pub event: NostrEvent,
+    pub event: PoWEvent,
     pub total_time: f64,
 }
 
@@ -41,7 +41,7 @@ struct HashableEvent<'a>(
 );
 
 #[inline]
-fn get_event_hash(event: &NostrEvent) -> Vec<u8> {
+fn get_event_hash(event: &PoWEvent) -> Vec<u8> {
     let hashable_event = HashableEvent(
         0u32,
         &event.pubkey,
@@ -81,7 +81,7 @@ fn get_pow(hash_bytes: &[u8]) -> u32 {
 
 pub async fn spawn_workers(
     n_workers: u64,
-    event: NostrEvent,
+    event: PoWEvent,
     difficulty: u32,
     log_interval: u64,
 ) -> MinedResult {
@@ -130,7 +130,7 @@ fn hashrate_avg(hashrate_buf: CircularBuffer<HASHRATE_BUF_SIZE, u64>) -> f32 {
 }
 fn mine_event(
     worker_id: u64,
-    mut event: NostrEvent,
+    mut event: PoWEvent,
     difficulty: u32,
     start_nonce: u64,
     log_interval: u64,
@@ -245,7 +245,7 @@ mod tests {
     #[test]
     fn test_mine_event() {
         tracing_subscriber::fmt::init();
-        let event = NostrEvent {
+        let event = PoWEvent {
             pubkey: "e771af0b05c8e95fcdf6feb3500544d2fb1ccd384788e9f490bb3ee28e8ed66f".to_string(),
             kind: 1,
             content: "hello world".to_string(),
@@ -276,7 +276,7 @@ mod tests {
     }
     #[test]
     fn test_get_event_hash() {
-        let event = NostrEvent {
+        let event = PoWEvent {
             pubkey: "e771af0b05c8e95fcdf6feb3500544d2fb1ccd384788e9f490bb3ee28e8ed66f".to_string(),
             kind: 1,
             content: "hello world".to_string(),

@@ -12,7 +12,7 @@ use nostr_sdk::{JsonUtil, Keys, NostrSigner, SecretKey, UnsignedEvent};
 use crate::args::{PublishArgs, SellArgs};
 use crate::client::publish;
 use crate::error::ZapError;
-use crate::miner::{spawn_workers, NostrEvent};
+use crate::miner::{spawn_workers, PoWEvent};
 use crate::sell::{pow_price, verify_zap};
 
 pub async fn mine(args: PublishArgs) {
@@ -26,7 +26,7 @@ pub async fn mine(args: PublishArgs) {
 
     let event_file = File::open("event.json").expect("expect a valid filepath");
     let event_reader = BufReader::new(event_file);
-    let event: NostrEvent =
+    let event: PoWEvent =
         serde_json::from_reader(event_reader).expect("expect a valid event JSON");
 
     let mined_result = spawn_workers(
@@ -70,7 +70,7 @@ struct QuoteRpc {
 
 #[derive(Serialize, Deserialize)]
 struct MineRpc {
-    event: NostrEvent,
+    event: PoWEvent,
     difficulty: u32,
     zap: String, // todo: use nostr-zapper crate
 }
