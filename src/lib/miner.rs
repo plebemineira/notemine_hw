@@ -1,10 +1,11 @@
-use circular_buffer::CircularBuffer;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
 use sha2::{Digest, Sha256};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use tracing::info;
 use tokio::sync::mpsc::{channel, Sender};
+use crate::types::{Difficulty, HashrateBuf, Nonce};
+use crate::hashrate::hashrate_avg;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct PoWEvent {
@@ -17,7 +18,7 @@ pub struct PoWEvent {
     pub sig: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
 pub struct MinedResult {
     pub event: PoWEvent,
     pub total_time: f64,
@@ -82,11 +83,12 @@ fn get_pow(hash_bytes: &[u8]) -> u32 {
 pub async fn spawn_workers(
     n_workers: u64,
     event: PoWEvent,
-    difficulty: u32,
+    difficulty: Difficulty,
     log_interval: u64,
 ) -> MinedResult {
     let nonce_step = u64::MAX / n_workers;
 
+    // todo: replace these MinedResult channels with WorkerLog channels
     let (result_tx, mut result_rx) = channel(1);
 
     for i in 0..n_workers {
@@ -114,22 +116,11 @@ pub async fn spawn_workers(
     mined_result
 }
 
-// hashrate_buf is useful for averaging hashrate
-const HASHRATE_BUF_SIZE: usize = 10;
-
-fn hashrate_avg(hashrate_buf: CircularBuffer<HASHRATE_BUF_SIZE, u64>) -> f32 {
-    let mut hashrate_sum = 0;
-    for hashrate_log in &hashrate_buf {
-        hashrate_sum += hashrate_log;
-    }
-    let hashrate_avg = hashrate_sum as f32 / hashrate_buf.len() as f32;
-    hashrate_avg
-}
 async fn mine_event(
     worker_id: u64,
     mut event: PoWEvent,
-    difficulty: u32,
-    start_nonce: u64,
+    difficulty: Difficulty,
+    start_nonce: Nonce,
     log_interval: u64,
     result_tx: Sender<MinedResult>
 ) -> MinedResult {
@@ -175,7 +166,7 @@ async fn mine_event(
     let start_instant = Instant::now();
     let mut last_log_instant = start_instant;
 
-    let mut hashrate_buf = CircularBuffer::<HASHRATE_BUF_SIZE, u64>::new();
+    let mut hashrate_buf = HashrateBuf::new();
 
     loop {
         if result_tx.is_closed() {
@@ -267,6 +258,7 @@ mod tests {
         let worker_id = 0;
 
         let (result_tx, result_rx) = channel(1);
+        // let (hashrate_tx, hashrate_rx) = channel(args.n_workers);
 
         let mined_result = mine_event(worker_id, event.clone(), difficulty, 0, 1, result_tx).await;
 

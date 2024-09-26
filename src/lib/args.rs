@@ -1,4 +1,5 @@
 use clap::Parser;
+use crate::types::Difficulty;
 
 #[derive(Parser, Debug)]
 pub struct PublishArgs {
@@ -7,7 +8,7 @@ pub struct PublishArgs {
     #[arg(short, long, help = "log interval (secs)")]
     pub log_interval: u64,
     #[arg(short, long, help = "difficulty")]
-    pub difficulty: u32,
+    pub difficulty: Difficulty,
     #[arg(short, long, help = "path to event JSON file")]
     pub event_json: String,
     #[arg(short, long, help = "relay URL")]
