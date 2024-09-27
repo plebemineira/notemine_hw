@@ -123,7 +123,7 @@ async fn mine_event(
     start_nonce: Nonce,
     log_interval: u64,
     result_tx: Sender<MinedResult>
-) -> MinedResult {
+) {
 
     if event.created_at.is_none() {
         let current_timestamp = SystemTime::now()
@@ -231,8 +231,6 @@ async fn mine_event(
         nonce = nonce.wrapping_add(1);
         total_hashes += 1;
     }
-
-    return MinedResult::default()
 }
 
 #[cfg(test)]
@@ -257,10 +255,17 @@ mod tests {
         let difficulty = 18;
         let worker_id = 0;
 
-        let (result_tx, result_rx) = channel(1);
-        // let (hashrate_tx, hashrate_rx) = channel(args.n_workers);
+        let (result_tx, mut result_rx) = channel(1);
 
-        let mined_result = mine_event(worker_id, event.clone(), difficulty, 0, 1, result_tx).await;
+        let event_clone = event.clone();
+        tokio::spawn(async move {
+            mine_event(worker_id, event_clone, difficulty, 0, 1, result_tx).await;
+        });
+
+        let mined_result = tokio::spawn(async move {
+            let result = result_rx.recv().await.expect("expect result");
+            result
+        }).await.expect("expect successfully return result");
 
         assert_eq!(mined_result.event.pubkey, event.pubkey);
         assert_eq!(mined_result.event.kind, event.kind);
