@@ -1,6 +1,20 @@
 use std::collections::HashMap;
+use tracing::info;
+
 use crate::miner::MinedResult;
-use crate::types::{Difficulty, Hashrate, HashrateAvg, HashrateBuf, Nonce, WorkerId};
+use crate::types::{Difficulty, Hash, Hashrate, HashrateAvg, HashrateBuf, Nonce, WorkerId};
+
+pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs) {
+    let worker_samples = global_worker_logs.sample_workers();
+
+    let mut global_hashrate = 0;
+
+    for sample in worker_samples {
+        global_hashrate += sample.hashrate;
+    }
+
+    info!("global hashrate: {} h/s", global_hashrate);
+}
 
 pub fn hashrate_avg(hashrate_buf: HashrateBuf) -> HashrateAvg {
     let mut hashrate_sum = 0;
@@ -17,6 +31,7 @@ pub struct WorkerLog {
     pub hashrate: Hashrate,
     pub best_nonce: Nonce,
     pub best_pow: Difficulty,
+    pub best_hash: Hash,
     pub mined_result: Option<MinedResult>,
 }
 
@@ -63,7 +78,8 @@ mod test {
             let hashrate = 1;
             let best_nonce = 0;
             let best_pow = 0;
-            let worker_log = WorkerLog { worker_id: worker_id as WorkerId, hashrate, best_nonce, best_pow, mined_result: None };
+            let best_hash = Vec::<u8>::new();
+            let worker_log = WorkerLog { worker_id: worker_id as WorkerId, hashrate, best_nonce, best_pow, best_hash, mined_result: None };
             global_worker_logs.update(worker_log);
         }
 

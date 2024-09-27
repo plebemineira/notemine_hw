@@ -4,8 +4,8 @@ use sha2::{Digest, Sha256};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use tracing::info;
 use tokio::sync::mpsc::{channel, Sender};
-use crate::types::{Difficulty, HashrateBuf, Nonce};
-use crate::hashrate::hashrate_avg;
+use crate::types::{Difficulty, Hashrate, HashrateAvg, HashrateBuf, Nonce};
+use crate::hashrate::{hashrate_avg, report_hashrate, GlobalWorkerLogs, WorkerLog};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct PoWEvent {
@@ -88,15 +88,14 @@ pub async fn spawn_workers(
 ) -> MinedResult {
     let nonce_step = u64::MAX / n_workers;
 
-    // todo: replace these MinedResult channels with WorkerLog channels
-    let (result_tx, mut result_rx) = channel(1);
+    let (worker_log_tx, mut worker_log_rx) = channel(n_workers as usize);
 
     for i in 0..n_workers {
         let event_clone = event.clone();
-        let result_tx_clone = result_tx.clone();
+        let result_tx_clone = worker_log_tx.clone();
         let start_nonce = i * nonce_step;
         tokio::spawn(async move {
-            let mined_result = mine_event(
+            mine_event(
                 i,
                 event_clone,
                 difficulty,
@@ -104,13 +103,37 @@ pub async fn spawn_workers(
                 log_interval,
                 result_tx_clone
             ).await;
-            return mined_result;
         });
     }
 
+    let start_instant = Instant::now();
+    let mut last_log_instant = start_instant;
+
+    // drain worker_log_rx until a solution is found
     let mined_result = tokio::spawn(async move {
-        let result = result_rx.recv().await.expect("expect result");
-        result
+        let mut global_worker_log = GlobalWorkerLogs::new(n_workers as usize);
+
+        let mut mined_result = MinedResult::default();
+        while let Some(worker_log) = worker_log_rx.recv().await {
+            // report hashrate every log_interval secs
+            if Instant::now().duration_since(last_log_instant) > Duration::from_secs(log_interval) {
+                last_log_instant = Instant::now();
+                report_hashrate(global_worker_log.clone());
+            }
+
+            // found solution, return and drop worker_log_rx to abort all workers
+            if let Some(solution) = worker_log.mined_result {
+                mined_result = solution;
+                drop(worker_log_rx);
+                break;
+            }
+            // no solution found yet, just update global_worker_log
+            else {
+                global_worker_log.update(worker_log);
+            }
+        }
+
+        return mined_result;
     }).await.expect("expect successfully return result");
 
     mined_result
@@ -122,7 +145,7 @@ async fn mine_event(
     difficulty: Difficulty,
     start_nonce: Nonce,
     log_interval: u64,
-    result_tx: Sender<MinedResult>
+    worker_log_tx: Sender<WorkerLog>
 ) {
 
     if event.created_at.is_none() {
@@ -167,11 +190,9 @@ async fn mine_event(
     let mut last_log_instant = start_instant;
 
     let mut hashrate_buf = HashrateBuf::new();
+    let mut hashrate_average = 0.0;
 
     loop {
-        if result_tx.is_closed() {
-            break;
-        }
         // report hashrate every log_interval secs
         if Instant::now().duration_since(last_log_instant) > Duration::from_secs(log_interval) {
             last_log_instant = Instant::now();
@@ -180,16 +201,23 @@ async fn mine_event(
             hashrate_buf.push_back(hashrate);
             total_hashes = 0;
 
-            let hashrate_avg = hashrate_avg(hashrate_buf.clone());
+            hashrate_average = hashrate_avg(hashrate_buf.clone());
 
-            info!(
-                "worker id: {} | hashrate: {:.01} h/s | best pow: {} | best nonce: {} | best hash: {:?}",
+            let worker_log = WorkerLog {
                 worker_id,
-                hashrate_avg,
-                best_pow,
+                hashrate: hashrate_average as Hashrate,
                 best_nonce,
-                hex::encode(best_hash_bytes.clone())
-            );
+                best_pow,
+                best_hash: best_hash_bytes.clone(),
+                mined_result: None,
+            };
+
+            // if another worker found a solution first, worker_log_tx should close
+            if worker_log_tx.is_closed() {
+                break;
+            } else {
+                worker_log_tx.send(worker_log).await.expect("expect successful send result");
+            }
         }
 
         if let Some(index) = nonce_index {
@@ -221,11 +249,22 @@ async fn mine_event(
 
             let result = MinedResult { event: event.clone(), total_time };
 
-            // if another worker found a solution first, result_rx will close
-            if !result_tx.is_closed() {
-                result_tx.send(result).await.expect("expect successful send result");
+            let worker_log = WorkerLog {
+                worker_id,
+                hashrate: hashrate_average as Hashrate,
+                best_nonce,
+                best_pow,
+                best_hash: best_hash_bytes.clone(),
+                mined_result: Some(result),
+            };
+
+            // if another worker found a solution first, worker_log_tx should close
+            if worker_log_tx.is_closed() {
+                break;
+            } else {
+                worker_log_tx.send(worker_log).await.expect("expect successful send result");
+                break;
             }
-            break;
         }
 
         nonce = nonce.wrapping_add(1);
@@ -238,6 +277,7 @@ mod tests {
     use super::*;
     use hex::FromHex;
     use tokio::sync::mpsc::channel;
+    use crate::hashrate::GlobalWorkerLogs;
 
     // worker_threads == n_workers
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -253,7 +293,6 @@ mod tests {
             sig: None,
         };
 
-        let difficulty = 21;
         let difficulty = 20;
 
         let n_workers = 2;
@@ -279,9 +318,24 @@ mod tests {
             });
         }
 
+        // drain worker_log_rx until a solution is found
         let mined_result = tokio::spawn(async move {
-            let result = worker_log_rx.recv().await.expect("expect result");
-            result
+            let mut global_worker_log = GlobalWorkerLogs::new(n_workers as usize);
+            let mut mined_result = MinedResult::default();
+            while let Some(worker_log) = worker_log_rx.recv().await {
+                // found solution, return and drop worker_log_rx to abort all workers
+                if let Some(solution) = worker_log.mined_result {
+                    mined_result = solution;
+                    drop(worker_log_rx);
+                    break;
+                }
+                // no solution found yet, just update global_worker_log
+                else {
+                    global_worker_log.update(worker_log);
+                }
+            }
+
+            return mined_result;
         }).await.expect("expect successfully return result");
 
         assert_eq!(mined_result.event.pubkey, event.pubkey);
