@@ -53,10 +53,10 @@ pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs) {
     global_hashrate_str.push_str(" h/s");
     let global_row = vec![
         "global".cell(),
-        global_hashrate_str.cell(),
-        global_best_nonce.cell(),
-        global_best_pow.cell(),
-        global_best_hash.cell(),
+        global_hashrate_str.cell().bold(true),
+        global_best_nonce.cell().bold(true),
+        global_best_pow.cell().bold(true),
+        global_best_hash.cell().bold(true),
     ];
 
     let header = vec![
