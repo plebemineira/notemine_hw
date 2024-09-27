@@ -239,7 +239,8 @@ mod tests {
     use hex::FromHex;
     use tokio::sync::mpsc::channel;
 
-    #[tokio::test]
+    // worker_threads == n_workers
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
     async fn test_mine_event() {
         tracing_subscriber::fmt::init();
         let event = PoWEvent {
@@ -252,18 +253,34 @@ mod tests {
             sig: None,
         };
 
-        let difficulty = 18;
-        let worker_id = 0;
+        let difficulty = 21;
+        let difficulty = 20;
 
-        let (result_tx, mut result_rx) = channel(1);
+        let n_workers = 2;
+        let nonce_step = u64::MAX / n_workers;
+        let log_interval = 1;
 
-        let event_clone = event.clone();
-        tokio::spawn(async move {
-            mine_event(worker_id, event_clone, difficulty, 0, 1, result_tx).await;
-        });
+        let (worker_log_tx, mut worker_log_rx) = channel(n_workers as usize);
+
+        for i in 0..n_workers {
+            let event_clone = event.clone();
+            let result_tx_clone = worker_log_tx.clone();
+            let start_nonce = i * nonce_step;
+            tokio::spawn(async move {
+                let mined_result = mine_event(
+                    i,
+                    event_clone,
+                    difficulty,
+                    start_nonce,
+                    log_interval,
+                    result_tx_clone
+                ).await;
+                return mined_result;
+            });
+        }
 
         let mined_result = tokio::spawn(async move {
-            let result = result_rx.recv().await.expect("expect result");
+            let result = worker_log_rx.recv().await.expect("expect result");
             result
         }).await.expect("expect successfully return result");
 
@@ -282,6 +299,7 @@ mod tests {
 
         assert!(get_pow(&id_bytes) >= difficulty);
     }
+
     #[test]
     fn test_get_event_hash() {
         let event = PoWEvent {
