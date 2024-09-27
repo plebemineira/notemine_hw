@@ -1,5 +1,5 @@
-use clap::Parser;
 use crate::types::Difficulty;
+use clap::Parser;
 
 #[derive(Parser, Debug)]
 pub struct PublishArgs {

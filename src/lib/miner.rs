@@ -1,11 +1,11 @@
+use crate::hashrate::{hashrate_avg, report_hashrate, GlobalWorkerLogs, WorkerLog};
+use crate::types::{Difficulty, Hashrate, HashrateAvg, HashrateBuf, Nonce};
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
 use sha2::{Digest, Sha256};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
-use tracing::info;
 use tokio::sync::mpsc::{channel, Sender};
-use crate::types::{Difficulty, Hashrate, HashrateAvg, HashrateBuf, Nonce};
-use crate::hashrate::{hashrate_avg, report_hashrate, GlobalWorkerLogs, WorkerLog};
+use tracing::info;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct PoWEvent {
@@ -101,8 +101,9 @@ pub async fn spawn_workers(
                 difficulty,
                 start_nonce,
                 log_interval,
-                result_tx_clone
-            ).await;
+                result_tx_clone,
+            )
+            .await;
         });
     }
 
@@ -134,7 +135,9 @@ pub async fn spawn_workers(
         }
 
         return mined_result;
-    }).await.expect("expect successfully return result");
+    })
+    .await
+    .expect("expect successfully return result");
 
     mined_result
 }
@@ -145,9 +148,8 @@ async fn mine_event(
     difficulty: Difficulty,
     start_nonce: Nonce,
     log_interval: u64,
-    worker_log_tx: Sender<WorkerLog>
+    worker_log_tx: Sender<WorkerLog>,
 ) {
-
     if event.created_at.is_none() {
         let current_timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -216,7 +218,10 @@ async fn mine_event(
             if worker_log_tx.is_closed() {
                 break;
             } else {
-                worker_log_tx.send(worker_log).await.expect("expect successful send result");
+                worker_log_tx
+                    .send(worker_log)
+                    .await
+                    .expect("expect successful send result");
             }
         }
 
@@ -247,7 +252,10 @@ async fn mine_event(
             event.id = Some(event_hash.clone());
             let total_time = start_instant.elapsed().as_secs_f64();
 
-            let result = MinedResult { event: event.clone(), total_time };
+            let result = MinedResult {
+                event: event.clone(),
+                total_time,
+            };
 
             let worker_log = WorkerLog {
                 worker_id,
@@ -262,7 +270,10 @@ async fn mine_event(
             if worker_log_tx.is_closed() {
                 break;
             } else {
-                worker_log_tx.send(worker_log).await.expect("expect successful send result");
+                worker_log_tx
+                    .send(worker_log)
+                    .await
+                    .expect("expect successful send result");
                 break;
             }
         }
@@ -275,9 +286,9 @@ async fn mine_event(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::hashrate::GlobalWorkerLogs;
     use hex::FromHex;
     use tokio::sync::mpsc::channel;
-    use crate::hashrate::GlobalWorkerLogs;
 
     // worker_threads == n_workers
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -312,8 +323,9 @@ mod tests {
                     difficulty,
                     start_nonce,
                     log_interval,
-                    result_tx_clone
-                ).await;
+                    result_tx_clone,
+                )
+                .await;
                 return mined_result;
             });
         }
@@ -336,7 +348,9 @@ mod tests {
             }
 
             return mined_result;
-        }).await.expect("expect successfully return result");
+        })
+        .await
+        .expect("expect successfully return result");
 
         assert_eq!(mined_result.event.pubkey, event.pubkey);
         assert_eq!(mined_result.event.kind, event.kind);

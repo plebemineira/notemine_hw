@@ -150,7 +150,14 @@ mod test {
             let best_nonce = 0;
             let best_pow = 0;
             let best_hash = Vec::<u8>::new();
-            let worker_log = WorkerLog { worker_id: worker_id as WorkerId, hashrate, best_nonce, best_pow, best_hash, mined_result: None };
+            let worker_log = WorkerLog {
+                worker_id: worker_id as WorkerId,
+                hashrate,
+                best_nonce,
+                best_pow,
+                best_hash,
+                mined_result: None,
+            };
             global_worker_logs.update(worker_log);
         }
 
