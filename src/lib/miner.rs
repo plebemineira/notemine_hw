@@ -1,5 +1,5 @@
 use crate::hashrate::{hashrate_avg, report_hashrate, GlobalWorkerLogs, WorkerLog};
-use crate::types::{Difficulty, Hashrate, HashrateAvg, HashrateBuf, Nonce};
+use crate::types::{Difficulty, Hashrate, HashrateBuf, Nonce};
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
 use sha2::{Digest, Sha256};
@@ -73,7 +73,7 @@ fn get_pow(hash_bytes: &[u8]) -> u32 {
         if byte == 0 {
             count += 8;
         } else {
-            count += byte.leading_zeros() as u32;
+            count += byte.leading_zeros();
             break;
         }
     }
@@ -111,7 +111,9 @@ pub async fn spawn_workers(
     let mut last_log_instant = start_instant;
 
     // drain worker_log_rx until a solution is found
-    let mined_result = tokio::spawn(async move {
+    
+
+    tokio::spawn(async move {
         let mut global_worker_log = GlobalWorkerLogs::new(n_workers as usize);
 
         let mut mined_result = MinedResult::default();
@@ -134,12 +136,10 @@ pub async fn spawn_workers(
             }
         }
 
-        return mined_result;
+        mined_result
     })
     .await
-    .expect("expect successfully return result");
-
-    mined_result
+    .expect("expect successfully return result")
 }
 
 async fn mine_event(
@@ -160,7 +160,7 @@ async fn mine_event(
 
     let mut nonce_index = None;
     for (i, tag) in event.tags.iter().enumerate() {
-        if tag.len() > 0 && tag[0] == "nonce" {
+        if !tag.is_empty() && tag[0] == "nonce" {
             nonce_index = Some(i);
             break;
         }
@@ -326,7 +326,7 @@ mod tests {
                     result_tx_clone,
                 )
                 .await;
-                return mined_result;
+                mined_result
             });
         }
 
@@ -347,7 +347,7 @@ mod tests {
                 }
             }
 
-            return mined_result;
+            mined_result
         })
         .await
         .expect("expect successfully return result");
@@ -383,7 +383,7 @@ mod tests {
         let expected_hash = "bb9727a19e7ed120333e994ada9c3b6e4a360a71739f9ea33def6d69638fff30";
 
         let hash_bytes = get_event_hash(&event);
-        let hash_hex = hex::encode(&hash_bytes);
+        let hash_hex = hex::encode(hash_bytes);
 
         assert_eq!(hash_hex, expected_hash);
     }

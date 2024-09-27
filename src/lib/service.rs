@@ -123,14 +123,14 @@ pub async fn sell(args: SellArgs) {
                         info!("successfully mined event in {} seconds", duration);
                         info!("{:?}", mined_result);
 
-                        return Ok(
+                        Ok(
                             json!({ "id": mined_id, "nonce": nonce, "difficulty": difficulty }),
-                        );
+                        )
                     }
                     Err(ZapError::InsufficientZap) => {
-                        return Err(Error::invalid_params("Insufficient Zap"))
+                        Err(Error::invalid_params("Insufficient Zap"))
                     }
-                    Err(ZapError::InvalidZap) => return Err(Error::invalid_params("Invalid Zap")),
+                    Err(ZapError::InvalidZap) => Err(Error::invalid_params("Invalid Zap")),
                 }
             }
             Err(_) => Err(Error::invalid_params("Invalid params")),

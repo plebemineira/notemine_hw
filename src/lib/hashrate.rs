@@ -11,7 +11,7 @@ pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs) {
 
     let worker_samples = global_worker_logs.sample_workers();
 
-    if worker_samples.len() == 0 {
+    if worker_samples.is_empty() {
         // nothing to report
         return;
     }
@@ -73,7 +73,7 @@ pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs) {
         table.push(row);
     }
     let print_table = table.table().title(header);
-    info!("reporting work:");
+    info!("reporting work...");
     print_stdout(print_table).expect("expect successful print_stdout");
 }
 
@@ -82,8 +82,8 @@ pub fn hashrate_avg(hashrate_buf: HashrateBuf) -> HashrateAvg {
     for hashrate_log in &hashrate_buf {
         hashrate_sum += hashrate_log;
     }
-    let hashrate_avg = hashrate_sum as f32 / hashrate_buf.len() as f32;
-    hashrate_avg
+    
+    hashrate_sum as f32 / hashrate_buf.len() as f32
 }
 
 #[derive(Default, Clone, Debug)]
@@ -137,7 +137,7 @@ impl GlobalWorkerLogs {
 #[cfg(test)]
 mod test {
     use crate::hashrate::{GlobalWorkerLogs, WorkerLog};
-    use crate::miner::MinedResult;
+    
     use crate::types::WorkerId;
 
     #[test]
