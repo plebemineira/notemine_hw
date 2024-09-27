@@ -11,7 +11,7 @@ pub fn hashrate_avg(hashrate_buf: HashrateBuf) -> HashrateAvg {
     hashrate_avg
 }
 
-#[derive(Clone, Debug)]
+#[derive(Default, Clone, Debug)]
 pub struct WorkerLog {
     pub worker_id: WorkerId,
     pub hashrate: Hashrate,
@@ -32,15 +32,16 @@ impl GlobalWorkerLogs {
         }
     }
 
-    pub fn update(mut self, worker_log: WorkerLog) {
+    pub fn update(&mut self, worker_log: WorkerLog) {
         let _ = self.map.insert(worker_log.worker_id, worker_log.clone());
     }
 
     pub fn sample_workers(self) -> Vec<WorkerLog> {
-        let mut workers = Vec::<WorkerLog>::with_capacity(self.map.len());
+        let mut workers = vec![WorkerLog::default(); self.map.len()];
         for (worker_id, worker_log) in self.map.iter() {
             let worker_log = worker_log.clone();
             workers.insert(*worker_id as usize, worker_log);
+            // workers.push(worker_log);
         }
 
         workers
@@ -50,22 +51,23 @@ impl GlobalWorkerLogs {
 #[cfg(test)]
 mod test {
     use crate::hashrate::{GlobalWorkerLogs, WorkerLog};
+    use crate::miner::MinedResult;
     use crate::types::WorkerId;
 
     #[test]
     fn test_global_hashrate() {
         let n_workers = 100;
-        let global_worker_logs = GlobalWorkerLogs::new(n_workers);
+        let mut global_worker_logs = GlobalWorkerLogs::new(n_workers);
 
         for worker_id in 0..n_workers {
             let hashrate = 1;
             let best_nonce = 0;
             let best_pow = 0;
             let worker_log = WorkerLog { worker_id: worker_id as WorkerId, hashrate, best_nonce, best_pow, mined_result: None };
-            global_worker_logs.clone().update(worker_log);
+            global_worker_logs.update(worker_log);
         }
 
-        let worker_log_samples = global_worker_logs.sample_workers();
+        let worker_log_samples = global_worker_logs.clone().sample_workers();
         let mut global_hashrate = 0;
         for sample in worker_log_samples {
             global_hashrate += sample.hashrate;
