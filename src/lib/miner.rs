@@ -215,13 +215,10 @@ async fn mine_event(
             };
 
             // if another worker found a solution first, worker_log_tx should close
-            if worker_log_tx.is_closed() {
+            if let Err(_) = worker_log_tx
+                .send(worker_log)
+                .await {
                 break;
-            } else {
-                worker_log_tx
-                    .send(worker_log)
-                    .await
-                    .expect("expect successful send result");
             }
         }
 
