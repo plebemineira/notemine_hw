@@ -7,6 +7,7 @@ LOG_INTERVAL=1
 
 cargo run -- publish \
         --n-workers $N_WORKERS \
+        --log-workers \
         --difficulty $DIFFICULTY \
         --event-json $EVENT_JSON \
         --relay-url $RELAY_URL \

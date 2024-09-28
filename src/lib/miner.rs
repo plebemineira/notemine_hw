@@ -82,6 +82,7 @@ fn get_pow(hash_bytes: &[u8]) -> u32 {
 
 pub async fn spawn_workers(
     n_workers: u64,
+    log_workers: bool,
     event: PoWEvent,
     difficulty: Difficulty,
     log_interval: u64,
@@ -121,7 +122,7 @@ pub async fn spawn_workers(
             // report hashrate every log_interval secs
             if Instant::now().duration_since(last_log_instant) > Duration::from_secs(log_interval) {
                 last_log_instant = Instant::now();
-                report_hashrate(global_worker_log.clone());
+                report_hashrate(global_worker_log.clone(), log_workers);
             }
 
             // found solution, return and drop worker_log_rx to abort all workers

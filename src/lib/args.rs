@@ -5,6 +5,8 @@ use clap::Parser;
 pub struct PublishArgs {
     #[arg(long, help = "number of workers")]
     pub n_workers: u64,
+    #[arg(long, help = "log individual workers")]
+    pub log_workers: bool,
     #[arg(short, long, help = "log interval (secs)")]
     pub log_interval: u64,
     #[arg(short, long, help = "difficulty")]
@@ -21,6 +23,8 @@ pub struct PublishArgs {
 pub struct SellArgs {
     #[arg(long, help = "number of workers")]
     pub n_workers: u64,
+    #[arg(long, help = "log individual workers")]
+    pub log_workers: bool,
     #[arg(short, long, help = "log interval (secs)")]
     pub log_interval: u64,
     #[arg(short, long, help = "RPC port")]

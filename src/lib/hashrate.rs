@@ -5,64 +5,68 @@ use tabled::{
     builder::Builder,
     settings::{Alignment, Style, object::Row, Color}
 };
-
 use crate::miner::MinedResult;
 use crate::types::{Hashrate, HashrateAvg, HashrateBuf, WorkerId};
 
-pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs) {
+pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs, log_workers: bool) {
     let global_hashrate = global_worker_logs.clone().sample_global_hashrate();
 
-    let worker_samples = global_worker_logs.sample_workers();
+    if log_workers {
+        let worker_samples = global_worker_logs.sample_workers();
 
-    if worker_samples.is_empty() {
-        // nothing to report
-        return;
-    }
+        if worker_samples.is_empty() {
+            // nothing to report
+            return;
+        }
 
-    let mut table_worker_rows = Vec::new();
+        let mut table_worker_rows = Vec::new();
 
-    for sample in worker_samples {
-        let sample_clone = sample.clone();
+        for sample in worker_samples {
+            let sample_clone = sample.clone();
 
-        let worker_id = sample_clone.worker_id;
-        let hashrate = sample_clone.hashrate;
+            let worker_id = sample_clone.worker_id;
+            let hashrate = sample_clone.hashrate;
 
-        let mut hashrate_str = hashrate.to_string();
-        hashrate_str.push_str(" h/s");
-        let table_worker_row = vec![
-            worker_id.to_string(),
-            hashrate_str.to_string(),
+            let mut hashrate_str = hashrate.to_string();
+            hashrate_str.push_str(" h/s");
+            let table_worker_row = vec![
+                worker_id.to_string(),
+                hashrate_str.to_string(),
+            ];
+
+            table_worker_rows.push(table_worker_row);
+        }
+
+        let mut global_hashrate_str = global_hashrate.to_string();
+        global_hashrate_str.push_str(" h/s");
+        let global_row = vec![
+            "global".to_string(),
+            global_hashrate_str.to_string(),
         ];
 
-        table_worker_rows.push(table_worker_row);
+        let header = vec![
+            "worker id",
+            "hashrate",
+        ];
+
+        let mut tabled_builder = Builder::default();
+        tabled_builder.push_record(header);
+        tabled_builder.push_record(global_row);
+
+        for row in table_worker_rows {
+            tabled_builder.push_record(row);
+        }
+
+        let mut tabled = tabled_builder.build();
+        tabled.with(Style::rounded());
+        tabled.with(Alignment::center());
+        tabled.modify(Row::from(1), Color::BOLD);
+
+        info!("reporting work... \n{}", tabled);
+    } else {
+        info!("hashrate: {} h/s", global_hashrate);
     }
 
-    let mut global_hashrate_str = global_hashrate.to_string();
-    global_hashrate_str.push_str(" h/s");
-    let global_row = vec![
-        "global".to_string(),
-        global_hashrate_str.to_string(),
-    ];
-
-    let header = vec![
-        "worker id",
-        "hashrate",
-    ];
-
-    let mut tabled_builder = Builder::default();
-    tabled_builder.push_record(header);
-    tabled_builder.push_record(global_row);
-
-    for row in table_worker_rows {
-        tabled_builder.push_record(row);
-    }
-
-    let mut tabled = tabled_builder.build();
-    tabled.with(Style::rounded());
-    tabled.with(Alignment::center());
-    tabled.modify(Row::from(1), Color::BOLD);
-
-    info!("reporting work... \n{}", tabled);
 }
 
 pub fn hashrate_avg(hashrate_buf: HashrateBuf) -> HashrateAvg {
