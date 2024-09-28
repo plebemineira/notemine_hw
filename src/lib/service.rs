@@ -7,7 +7,7 @@ use std::io::BufReader;
 use std::time::Instant;
 use tracing::info;
 
-use nostr_sdk::{JsonUtil, Keys, NostrSigner, SecretKey, UnsignedEvent};
+use nostr_sdk::{JsonUtil, Keys, SecretKey, UnsignedEvent};
 
 use crate::args::{PublishArgs, SellArgs};
 use crate::client::publish;
@@ -42,17 +42,12 @@ pub async fn mine(args: PublishArgs) {
     let mined_event = UnsignedEvent::from_json(mined_event_json.clone())
         .expect("expect Event to deserialize from JSON");
 
-    // sign mined event
+    // gen Keys from nsec
     let nsec = SecretKey::parse(&args.nsec).expect("expect valid nsec");
     let keys = Keys::new(nsec);
-    let signer = NostrSigner::from(keys);
-    let signed_mined_event = signer
-        .sign_event(mined_event)
-        .await
-        .expect("expect successful signature");
 
     // publish signed mined event
-    publish(&args.relay_url, signed_mined_event)
+    publish(&args.relay_url, keys, mined_event)
         .await
         .expect("expect successfully publish mined event");
 }

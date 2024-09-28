@@ -1,27 +1,22 @@
 use crate::error::Error;
 use nostr_sdk::prelude::*;
-use nostr_sdk::Event;
-use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use tracing::{error, info};
 
-pub async fn publish(relay_url: &str, mined_event: Event) -> Result<(), Error> {
-    let my_keys = Keys::generate();
-
-    let addr = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 9050));
-    let connection: Connection = Connection::new()
-        .proxy(addr) // Use `.embedded_tor()` instead to enable the embedded tor client (require `tor` feature)
-        .target(ConnectionTarget::Onion);
-
-    let opts = Options::new().connection(connection);
-    let client = Client::with_opts(&my_keys, opts);
-
+pub async fn publish(relay_url: &str, keys: Keys, mined_event: UnsignedEvent) -> Result<(), Error> {
+    let client = ClientBuilder::new().signer(keys).build();
     client.add_relay(relay_url).await?;
+
+    let signer = client.signer().await?;
+    let signed_mined_event = signer
+        .sign_event(mined_event)
+        .await
+        .expect("expect successful signature");
 
     // Connect to relays
     info!("connecting to relay: {}", relay_url);
     client.connect().await;
 
-    match client.send_event(mined_event).await {
+    match client.send_event(signed_mined_event).await {
         Ok(send_output) => info!("send mined event output: {:?}", send_output),
         Err(e) => error!("failed to send mined event: {}", e),
     };
