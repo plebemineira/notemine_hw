@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 use tracing::info;
 
-use cli_table::{print_stdout, Cell, Style, Table};
+use tabled::{
+    builder::Builder,
+    settings::{Alignment, Style, object::Row, Color}
+};
 
 use crate::miner::MinedResult;
 use crate::types::{Difficulty, Hash, Hashrate, HashrateAvg, HashrateBuf, Nonce, WorkerId};
@@ -39,11 +42,11 @@ pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs) {
         let mut hashrate_str = hashrate.to_string();
         hashrate_str.push_str(" h/s");
         let table_worker_row = vec![
-            worker_id.cell(),
-            hashrate_str.cell(),
-            best_nonce.cell(),
-            best_pow.cell(),
-            best_hash.cell(),
+            worker_id.to_string(),
+            hashrate_str.to_string(),
+            best_nonce.to_string(),
+            best_pow.to_string(),
+            best_hash.to_string(),
         ];
 
         table_worker_rows.push(table_worker_row);
@@ -52,29 +55,35 @@ pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs) {
     let mut global_hashrate_str = global_hashrate.to_string();
     global_hashrate_str.push_str(" h/s");
     let global_row = vec![
-        "global".cell(),
-        global_hashrate_str.cell().bold(true),
-        global_best_nonce.cell().bold(true),
-        global_best_pow.cell().bold(true),
-        global_best_hash.cell().bold(true),
+        "global".to_string(),
+        global_hashrate_str.to_string(),
+        global_best_nonce.to_string(),
+        global_best_pow.to_string(),
+        global_best_hash.to_string(),
     ];
 
     let header = vec![
-        "worker id".cell().bold(true),
-        "hashrate".cell().bold(true),
-        "best nonce".cell().bold(true),
-        "best PoW".cell().bold(true),
-        "best hash".cell().bold(true),
+        "worker id",
+        "hashrate",
+        "best nonce",
+        "best PoW",
+        "best hash",
     ];
 
-    let mut table = Vec::new();
-    table.push(global_row);
+    let mut tabled_builder = Builder::default();
+    tabled_builder.push_record(header);
+    tabled_builder.push_record(global_row);
+
     for row in table_worker_rows {
-        table.push(row);
+        tabled_builder.push_record(row);
     }
-    let print_table = table.table().title(header);
-    info!("reporting work...");
-    print_stdout(print_table).expect("expect successful print_stdout");
+
+    let mut tabled = tabled_builder.build();
+    tabled.with(Style::rounded());
+    tabled.with(Alignment::center());
+    tabled.modify(Row::from(1), Color::BOLD);
+
+    info!("reporting work... \n{}", tabled);
 }
 
 pub fn hashrate_avg(hashrate_buf: HashrateBuf) -> HashrateAvg {
