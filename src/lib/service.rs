@@ -24,7 +24,7 @@ pub async fn mine(args: PublishArgs) {
 
     let start_instant = Instant::now();
 
-    let event_file = File::open("event.json").expect("expect a valid filepath");
+    let event_file = File::open(args.event_json).expect("expect a valid filepath");
     let event_reader = BufReader::new(event_file);
     let event: PoWEvent = serde_json::from_reader(event_reader).expect("expect a valid event JSON");
 
