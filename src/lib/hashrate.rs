@@ -7,7 +7,7 @@ use tabled::{
 };
 
 use crate::miner::MinedResult;
-use crate::types::{Difficulty, Hash, Hashrate, HashrateAvg, HashrateBuf, Nonce, WorkerId};
+use crate::types::{Hashrate, HashrateAvg, HashrateBuf, WorkerId};
 
 pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs) {
     let global_hashrate = global_worker_logs.clone().sample_global_hashrate();
@@ -21,32 +21,17 @@ pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs) {
 
     let mut table_worker_rows = Vec::new();
 
-    let mut global_best_nonce = 0;
-    let mut global_best_pow = 0;
-    let mut global_best_hash = String::new();
     for sample in worker_samples {
         let sample_clone = sample.clone();
 
         let worker_id = sample_clone.worker_id;
         let hashrate = sample_clone.hashrate;
-        let best_nonce = sample_clone.best_nonce;
-        let best_pow = sample_clone.best_pow;
-        let best_hash = hex::encode(sample_clone.best_hash);
-
-        if sample.best_pow > global_best_pow {
-            global_best_nonce = best_nonce;
-            global_best_pow = best_pow;
-            global_best_hash = best_hash.clone();
-        }
 
         let mut hashrate_str = hashrate.to_string();
         hashrate_str.push_str(" h/s");
         let table_worker_row = vec![
             worker_id.to_string(),
             hashrate_str.to_string(),
-            best_nonce.to_string(),
-            best_pow.to_string(),
-            best_hash.to_string(),
         ];
 
         table_worker_rows.push(table_worker_row);
@@ -57,17 +42,11 @@ pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs) {
     let global_row = vec![
         "global".to_string(),
         global_hashrate_str.to_string(),
-        global_best_nonce.to_string(),
-        global_best_pow.to_string(),
-        global_best_hash.to_string(),
     ];
 
     let header = vec![
         "worker id",
         "hashrate",
-        "best nonce",
-        "best PoW",
-        "best hash",
     ];
 
     let mut tabled_builder = Builder::default();
@@ -99,9 +78,6 @@ pub fn hashrate_avg(hashrate_buf: HashrateBuf) -> HashrateAvg {
 pub struct WorkerLog {
     pub worker_id: WorkerId,
     pub hashrate: Hashrate,
-    pub best_nonce: Nonce,
-    pub best_pow: Difficulty,
-    pub best_hash: Hash,
     pub mined_result: Option<MinedResult>,
 }
 
@@ -156,15 +132,9 @@ mod test {
 
         for worker_id in 0..n_workers {
             let hashrate = 1;
-            let best_nonce = 0;
-            let best_pow = 0;
-            let best_hash = Vec::<u8>::new();
             let worker_log = WorkerLog {
                 worker_id: worker_id as WorkerId,
                 hashrate,
-                best_nonce,
-                best_pow,
-                best_hash,
                 mined_result: None,
             };
             global_worker_logs.update(worker_log);

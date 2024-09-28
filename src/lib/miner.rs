@@ -182,12 +182,6 @@ async fn mine_event(
     let mut nonce: u64 = start_nonce;
     let mut total_hashes: u64 = 0;
 
-    let mut best_pow: u32 = 0;
-    #[allow(unused_assignments)]
-    let mut best_nonce: u64 = 0;
-    #[allow(unused_assignments)]
-    let mut best_hash_bytes: Vec<u8> = Vec::new();
-
     let start_instant = Instant::now();
     let mut last_log_instant = start_instant;
 
@@ -208,9 +202,6 @@ async fn mine_event(
             let worker_log = WorkerLog {
                 worker_id,
                 hashrate: hashrate_average as Hashrate,
-                best_nonce,
-                best_pow,
-                best_hash: best_hash_bytes.clone(),
                 mined_result: None,
             };
 
@@ -238,12 +229,6 @@ async fn mine_event(
 
         let pow = get_pow(&hash_bytes);
 
-        if pow > best_pow {
-            best_pow = pow;
-            best_nonce = nonce;
-            best_hash_bytes = hash_bytes.clone();
-        }
-
         if pow >= difficulty {
             let event_hash = hex::encode(&hash_bytes);
             event.id = Some(event_hash.clone());
@@ -257,9 +242,6 @@ async fn mine_event(
             let worker_log = WorkerLog {
                 worker_id,
                 hashrate: hashrate_average as Hashrate,
-                best_nonce,
-                best_pow,
-                best_hash: best_hash_bytes.clone(),
                 mined_result: Some(result),
             };
 
