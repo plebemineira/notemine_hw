@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 use tracing::info;
 
-use tabled::{
-    builder::Builder,
-    settings::{Alignment, Style, object::Row, Color}
-};
 use crate::miner::MinedResult;
 use crate::types::{Hashrate, HashrateAvg, HashrateBuf, WorkerId};
+use tabled::{
+    builder::Builder,
+    settings::{object::Row, Alignment, Color, Style},
+};
 
 pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs, log_workers: bool) {
     let global_hashrate = global_worker_logs.clone().sample_global_hashrate();
@@ -29,25 +29,16 @@ pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs, log_workers: bool) 
 
             let mut hashrate_str = hashrate.to_string();
             hashrate_str.push_str(" h/s");
-            let table_worker_row = vec![
-                worker_id.to_string(),
-                hashrate_str.to_string(),
-            ];
+            let table_worker_row = vec![worker_id.to_string(), hashrate_str.to_string()];
 
             table_worker_rows.push(table_worker_row);
         }
 
         let mut global_hashrate_str = global_hashrate.to_string();
         global_hashrate_str.push_str(" h/s");
-        let global_row = vec![
-            "global".to_string(),
-            global_hashrate_str.to_string(),
-        ];
+        let global_row = vec!["global".to_string(), global_hashrate_str.to_string()];
 
-        let header = vec![
-            "worker id",
-            "hashrate",
-        ];
+        let header = vec!["worker id", "hashrate"];
 
         let mut tabled_builder = Builder::default();
         tabled_builder.push_record(header);
@@ -66,7 +57,6 @@ pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs, log_workers: bool) 
     } else {
         info!("hashrate: {} h/s", global_hashrate);
     }
-
 }
 
 pub fn hashrate_avg(hashrate_buf: HashrateBuf) -> HashrateAvg {
@@ -74,7 +64,7 @@ pub fn hashrate_avg(hashrate_buf: HashrateBuf) -> HashrateAvg {
     for hashrate_log in &hashrate_buf {
         hashrate_sum += hashrate_log;
     }
-    
+
     hashrate_sum as f32 / hashrate_buf.len() as f32
 }
 
@@ -126,7 +116,7 @@ impl GlobalWorkerLogs {
 #[cfg(test)]
 mod test {
     use crate::hashrate::{GlobalWorkerLogs, WorkerLog};
-    
+
     use crate::types::WorkerId;
 
     #[test]

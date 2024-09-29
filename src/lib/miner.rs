@@ -112,7 +112,6 @@ pub async fn spawn_workers(
     let mut last_log_instant = start_instant;
 
     // drain worker_log_rx until a solution is found
-    
 
     tokio::spawn(async move {
         let mut global_worker_log = GlobalWorkerLogs::new(n_workers as usize);
@@ -207,9 +206,7 @@ async fn mine_event(
             };
 
             // if another worker found a solution first, worker_log_tx should close
-            if let Err(_) = worker_log_tx
-                .send(worker_log)
-                .await {
+            if (worker_log_tx.send(worker_log).await).is_err() {
                 break;
             }
         }
@@ -297,7 +294,8 @@ mod tests {
             let result_tx_clone = worker_log_tx.clone();
             let start_nonce = i * nonce_step;
             tokio::spawn(async move {
-                let mined_result = mine_event(
+                
+                mine_event(
                     i,
                     event_clone,
                     difficulty,
@@ -305,8 +303,7 @@ mod tests {
                     log_interval,
                     result_tx_clone,
                 )
-                .await;
-                mined_result
+                .await
             });
         }
 
