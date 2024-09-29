@@ -47,46 +47,44 @@ Options:
       --nsec <NSEC>                  nsec
   -h, --help                         Print help
 
-$ notemine_hw publish --n-workers 3 --log-workers --difficulty 22 --event-json event.json --relay-url 'wss://plebemineira.xyz' --nsec nsec13ezg388stxfnxe72nc20428r7lrxzst85d60vxynk6zr57lpxu6svjam98 --log-interval 1
-2024-09-28T23:55:24.554771Z  INFO notemine_hw: 🗒⛏ notemine_hw ⚡⚙️
-2024-09-28T23:55:24.559146Z  INFO notemine::service: starting miner service to mine and publish the JSON event
-2024-09-28T23:55:24.561514Z  INFO notemine::miner: starting worker with parameters: worker id: 1 | difficulty: 22 | start_nonce: 6148914691236517205
-2024-09-28T23:55:24.561526Z  INFO notemine::miner: starting worker with parameters: worker id: 0 | difficulty: 22 | start_nonce: 0
-2024-09-28T23:55:24.561534Z  INFO notemine::miner: starting worker with parameters: worker id: 2 | difficulty: 22 | start_nonce: 12297829382473034410
-2024-09-28T23:55:27.562271Z  INFO notemine::hashrate: reporting work... 
-╭───────────┬────────────╮
-│ worker id │  hashrate  │
-├───────────┼────────────┤
-│  global   │ 156642 h/s │
-│     0     │ 51963 h/s  │
-│     1     │ 52460 h/s  │
-│     2     │ 52219 h/s  │
-╰───────────┴────────────╯
-2024-09-28T23:55:29.561855Z  INFO notemine::hashrate: reporting work... 
-╭───────────┬────────────╮
-│ worker id │  hashrate  │
-├───────────┼────────────┤
-│  global   │ 156675 h/s │
-│     0     │ 52064 h/s  │
-│     1     │ 52367 h/s  │
-│     2     │ 52244 h/s  │
-╰───────────┴────────────╯
-2024-09-28T23:55:30.561859Z  INFO notemine::hashrate: reporting work... 
-╭───────────┬────────────╮
-│ worker id │  hashrate  │
-├───────────┼────────────┤
-│  global   │ 156535 h/s │
-│     0     │ 51922 h/s  │
-│     1     │ 52369 h/s  │
-│     2     │ 52244 h/s  │
-╰───────────┴────────────╯
-2024-09-28T23:55:31.412536Z  INFO notemine::service: successfully mined event in 6.8533616 seconds
-2024-09-28T23:55:31.412589Z  INFO notemine::service: MinedResult { event: PoWEvent { pubkey: "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2", kind: 1, content: "hello world", tags: [["nonce", "354170", "22"]], id: Some("000001365bf36b9b4617680af6a9ebf6a60b1e1e1d9a8ee71e60b2685b41522b"), created_at: Some(1727567724), sig: None }, total_time: 6.850695375 }
-2024-09-28T23:55:31.416328Z  INFO nostr_sdk::client::handler: Spawned client notification handler
-2024-09-28T23:55:31.417238Z  INFO notemine::client: connecting to relay: wss://plebemineira.xyz
-2024-09-28T23:55:32.460250Z  INFO nostr_relay_pool::relay::internal: Connected to 'wss://plebemineira.xyz/'
-2024-09-28T23:55:32.888720Z  INFO notemine::client: send mined event output: Output { val: EventId(000001365bf36b9b4617680af6a9ebf6a60b1e1e1d9a8ee71e60b2685b41522b), success: {Url { scheme: "wss", cannot_be_a_base: false, username: "", password: None, host: Some(Domain("plebemineira.xyz")), port: None, path: "/", query: None, fragment: None }}, failed: {} }
-2024-09-28T23:55:32.889065Z  INFO notemine_hw: exiting...
+$ notemine_hw publish --n-workers 3 --log-workers --difficulty 20 --event-json event.json --relay-url 'wss://plebemineira.xyz' --nsec nsec13ezg388stxfnxe72nc20428r7lrxzst85d60vxynk6zr57lpxu6svjam98 --log-interval 1
+2024-09-29T02:31:53.871924Z  INFO notemine_hw: 🗒⛏ notemine_hw ⚡⚙️
+2024-09-29T02:31:53.876172Z  INFO notemine::service: starting miner service to mine and publish the JSON event
+2024-09-29T02:31:53.878672Z  INFO notemine::miner: starting worker with parameters: worker id: 0 | difficulty: 20 | start_nonce: 0
+2024-09-29T02:31:53.878684Z  INFO notemine::miner: starting worker with parameters: worker id: 2 | difficulty: 20 | start_nonce: 12297829382473034410
+2024-09-29T02:31:53.878690Z  INFO notemine::miner: starting worker with parameters: worker id: 1 | difficulty: 20 | start_nonce: 6148914691236517205
+2024-09-29T02:31:57.879543Z  INFO notemine::hashrate: 
+ worker id    hashrate  
+     0       52093 h/s  
+     1       52390 h/s  
+     2       52401 h/s  
+  global     156884 h/s 
+2024-09-29T02:31:58.878956Z  INFO notemine::hashrate: 
+ worker id    hashrate  
+     0       52097 h/s  
+     1       52427 h/s  
+     2       52454 h/s  
+  global     156978 h/s 
+2024-09-29T02:31:59.878997Z  INFO notemine::hashrate: 
+ worker id    hashrate  
+     0       52094 h/s  
+     1       52456 h/s  
+     2       52496 h/s  
+  global     157046 h/s 
+2024-09-29T02:32:00.879029Z  INFO notemine::hashrate: 
+ worker id    hashrate  
+     0       52108 h/s  
+     1       52472 h/s  
+     2       52507 h/s  
+  global     157087 h/s 
+2024-09-29T02:32:00.879186Z  INFO notemine::service: successfully mined event in 7.002937 seconds
+2024-09-29T02:32:00.879202Z  INFO notemine::service: MinedResult { event: PoWEvent { pubkey: "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2", kind: 1, content: "hello world", tags: [["nonce", "12297829382473392311", "20"]], id: Some("0000042f019fec1dff79c7dd893349bd325ffee2f0df9f322b219bb6b1902831"), created_at: Some(1727577113), sig: None }, total_time: 6.8147005830000005 }
+2024-09-29T02:32:00.882981Z  INFO nostr_sdk::client::handler: Spawned client notification handler
+2024-09-29T02:32:00.883819Z  INFO notemine::client: connecting to relay: wss://plebemineira.xyz
+2024-09-29T02:32:02.010302Z  INFO nostr_relay_pool::relay::internal: Connected to 'wss://plebemineira.xyz/'
+2024-09-29T02:32:02.276292Z  INFO notemine::client: send mined event output: Output { val: EventId(0000042f019fec1dff79c7dd893349bd325ffee2f0df9f322b219bb6b1902831), success: {Url { scheme: "wss", cannot_be_a_base: false, username: "", password: None, host: Some(Domain("plebemineira.xyz")), port: None, path: "/", query: None, fragment: None }}, failed: {} }
+2024-09-29T02:32:02.276651Z  INFO notemine_hw: exiting...
+2024-09-29T02:32:02.276842Z  INFO nostr_relay_pool::pool::internal: Relay pool shutdown
 ```
 
 The input JSON must contain the following fields:

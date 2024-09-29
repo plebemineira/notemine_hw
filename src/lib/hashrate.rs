@@ -5,7 +5,7 @@ use crate::miner::MinedResult;
 use crate::types::{Hashrate, HashrateAvg, HashrateBuf, WorkerId};
 use tabled::{
     builder::Builder,
-    settings::{object::Row, Alignment, Color, Style},
+    settings::{object::Rows, Alignment, Color, Style},
 };
 
 pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs, log_workers: bool) {
@@ -42,18 +42,19 @@ pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs, log_workers: bool) 
 
         let mut tabled_builder = Builder::default();
         tabled_builder.push_record(header);
-        tabled_builder.push_record(global_row);
 
         for row in table_worker_rows {
             tabled_builder.push_record(row);
         }
 
-        let mut tabled = tabled_builder.build();
-        tabled.with(Style::rounded());
-        tabled.with(Alignment::center());
-        tabled.modify(Row::from(1), Color::BOLD);
+        tabled_builder.push_record(global_row);
 
-        info!("reporting work... \n{}", tabled);
+        let mut tabled = tabled_builder.build();
+        tabled.with(Style::blank());
+        tabled.with(Alignment::center());
+        tabled.modify(Rows::last(), Color::BOLD);
+
+        info!("\n{}", tabled);
     } else {
         info!("hashrate: {} h/s", global_hashrate);
     }
