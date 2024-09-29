@@ -1,5 +1,5 @@
-use crate::hashrate::{hashrate_avg, report_hashrate, GlobalWorkerLogs, WorkerLog};
-use crate::types::{Difficulty, Hashrate, HashrateBuf, Nonce};
+use crate::hashrate::{report_hashrate, GlobalWorkerLogs, WorkerLog};
+use crate::types::{Difficulty, Nonce};
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
 use sha2::{Digest, Sha256};
@@ -185,23 +185,19 @@ async fn mine_event(
     let start_instant = Instant::now();
     let mut last_log_instant = start_instant;
 
-    let mut hashrate_buf = HashrateBuf::new();
-    let mut hashrate_average = 0.0;
+    let mut hashrate = 0;
 
     loop {
         // report hashrate every log_interval secs
         if Instant::now().duration_since(last_log_instant) > Duration::from_secs(log_interval) {
             last_log_instant = Instant::now();
 
-            let hashrate = total_hashes / log_interval;
-            hashrate_buf.push_back(hashrate);
+            hashrate = total_hashes / log_interval;
             total_hashes = 0;
-
-            hashrate_average = hashrate_avg(hashrate_buf.clone());
 
             let worker_log = WorkerLog {
                 worker_id,
-                hashrate: hashrate_average as Hashrate,
+                hashrate,
                 mined_result: None,
             };
 
@@ -239,7 +235,7 @@ async fn mine_event(
 
             let worker_log = WorkerLog {
                 worker_id,
-                hashrate: hashrate_average as Hashrate,
+                hashrate,
                 mined_result: Some(result),
             };
 

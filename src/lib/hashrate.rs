@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use tracing::info;
 
 use crate::miner::MinedResult;
-use crate::types::{Hashrate, HashrateAvg, HashrateBuf, WorkerId};
+use crate::types::{Hashrate, WorkerId};
 use tabled::{
     builder::Builder,
     settings::{object::Rows, Alignment, Color, Style},
@@ -58,15 +58,6 @@ pub fn report_hashrate(global_worker_logs: GlobalWorkerLogs, log_workers: bool) 
     } else {
         info!("hashrate: {} h/s", global_hashrate);
     }
-}
-
-pub fn hashrate_avg(hashrate_buf: HashrateBuf) -> HashrateAvg {
-    let mut hashrate_sum = 0;
-    for hashrate_log in &hashrate_buf {
-        hashrate_sum += hashrate_log;
-    }
-
-    hashrate_sum as f32 / hashrate_buf.len() as f32
 }
 
 #[derive(Default, Clone, Debug)]
