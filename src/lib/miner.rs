@@ -85,7 +85,6 @@ pub async fn spawn_workers(
     log_workers: bool,
     event: PoWEvent,
     difficulty: Difficulty,
-    log_interval: u64,
 ) -> MinedResult {
     let nonce_step = u64::MAX / n_workers;
 
@@ -96,15 +95,7 @@ pub async fn spawn_workers(
         let result_tx_clone = worker_log_tx.clone();
         let start_nonce = i * nonce_step;
         tokio::spawn(async move {
-            mine_event(
-                i,
-                event_clone,
-                difficulty,
-                start_nonce,
-                log_interval,
-                result_tx_clone,
-            )
-            .await;
+            mine_event(i, event_clone, difficulty, start_nonce, result_tx_clone).await;
         });
     }
 
@@ -118,8 +109,8 @@ pub async fn spawn_workers(
 
         let mut mined_result = MinedResult::default();
         while let Some(worker_log) = worker_log_rx.recv().await {
-            // report hashrate every log_interval secs
-            if Instant::now().duration_since(last_log_instant) > Duration::from_secs(log_interval) {
+            // report hashrate every 1 sec
+            if Instant::now().duration_since(last_log_instant) > Duration::from_secs(1) {
                 last_log_instant = Instant::now();
                 report_hashrate(global_worker_log.clone(), log_workers);
             }
@@ -147,7 +138,6 @@ async fn mine_event(
     mut event: PoWEvent,
     difficulty: Difficulty,
     start_nonce: Nonce,
-    log_interval: u64,
     worker_log_tx: Sender<WorkerLog>,
 ) {
     if event.created_at.is_none() {
@@ -188,11 +178,11 @@ async fn mine_event(
     let mut hashrate = 0;
 
     loop {
-        // report hashrate every log_interval secs
-        if Instant::now().duration_since(last_log_instant) > Duration::from_secs(log_interval) {
+        // report hashrate every 1 sec
+        if Instant::now().duration_since(last_log_instant) > Duration::from_secs(1) {
             last_log_instant = Instant::now();
 
-            hashrate = total_hashes / log_interval;
+            hashrate = total_hashes;
             total_hashes = 0;
 
             let worker_log = WorkerLog {
@@ -281,7 +271,6 @@ mod tests {
 
         let n_workers = 2;
         let nonce_step = u64::MAX / n_workers;
-        let log_interval = 1;
 
         let (worker_log_tx, mut worker_log_rx) = channel(n_workers as usize);
 
@@ -290,16 +279,7 @@ mod tests {
             let result_tx_clone = worker_log_tx.clone();
             let start_nonce = i * nonce_step;
             tokio::spawn(async move {
-                
-                mine_event(
-                    i,
-                    event_clone,
-                    difficulty,
-                    start_nonce,
-                    log_interval,
-                    result_tx_clone,
-                )
-                .await
+                mine_event(i, event_clone, difficulty, start_nonce, result_tx_clone).await
             });
         }
 

@@ -7,8 +7,6 @@ pub struct PublishArgs {
     pub n_workers: u64,
     #[arg(long, help = "log individual workers")]
     pub log_workers: bool,
-    #[arg(short, long, help = "log interval (secs)")]
-    pub log_interval: u64,
     #[arg(short, long, help = "difficulty")]
     pub difficulty: Difficulty,
     #[arg(short, long, help = "path to event JSON file")]
@@ -25,8 +23,6 @@ pub struct SellArgs {
     pub n_workers: u64,
     #[arg(long, help = "log individual workers")]
     pub log_workers: bool,
-    #[arg(short, long, help = "log interval (secs)")]
-    pub log_interval: u64,
     #[arg(short, long, help = "RPC port")]
     pub rpc_port: u16,
     #[arg(short, long, help = "PoW price factor")]

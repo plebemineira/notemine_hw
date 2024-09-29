@@ -40,14 +40,13 @@ Usage: notemine_hw publish --n-workers <N_WORKERS> --log-interval <LOG_INTERVAL>
 Options:
       --n-workers <N_WORKERS>        number of workers
       --log-workers                  log individual workers
-  -l, --log-interval <LOG_INTERVAL>  log interval (secs)
   -d, --difficulty <DIFFICULTY>      difficulty
   -e, --event-json <EVENT_JSON>      path to event JSON file
   -r, --relay-url <RELAY_URL>        relay URL
       --nsec <NSEC>                  nsec
   -h, --help                         Print help
 
-$ notemine_hw publish --n-workers 3 --log-workers --difficulty 20 --event-json event.json --relay-url 'wss://plebemineira.xyz' --nsec nsec13ezg388stxfnxe72nc20428r7lrxzst85d60vxynk6zr57lpxu6svjam98 --log-interval 1
+$ notemine_hw publish --n-workers 3 --log-workers --difficulty 20 --event-json event.json --relay-url 'wss://plebemineira.xyz' --nsec nsec13ezg388stxfnxe72nc20428r7lrxzst85d60vxynk6zr57lpxu6svjam98
 2024-09-29T02:31:53.871924Z  INFO notemine_hw: 🗒⛏ notemine_hw ⚡⚙️
 2024-09-29T02:31:53.876172Z  INFO notemine::service: starting miner service to mine and publish the JSON event
 2024-09-29T02:31:53.878672Z  INFO notemine::miner: starting worker with parameters: worker id: 0 | difficulty: 20 | start_nonce: 0
@@ -133,7 +132,6 @@ Usage: notemine_hw sell --n-workers <N_WORKERS> --log-interval <LOG_INTERVAL> --
 Options:
       --n-workers <N_WORKERS>                number of workers
       --log-workers                          log individual workers
-  -l, --log-interval <LOG_INTERVAL>          log interval (secs)
   -r, --rpc-port <RPC_PORT>                  RPC port
   -p, --pow-price-factor <POW_PRICE_FACTOR>  PoW price factor
   -h, --help                                 Print help

@@ -28,14 +28,8 @@ pub async fn mine(args: PublishArgs) {
     let event_reader = BufReader::new(event_file);
     let event: PoWEvent = serde_json::from_reader(event_reader).expect("expect a valid event JSON");
 
-    let mined_result = spawn_workers(
-        args.n_workers,
-        args.log_workers,
-        event,
-        args.difficulty,
-        args.log_interval,
-    )
-    .await;
+    let mined_result =
+        spawn_workers(args.n_workers, args.log_workers, event, args.difficulty).await;
 
     // log total mining time
     let duration = Instant::now().duration_since(start_instant).as_secs_f32();
@@ -107,14 +101,9 @@ pub async fn sell(args: SellArgs) {
                         // mine
                         let start_instant = Instant::now();
 
-                        let mined_result = spawn_workers(
-                            args.n_workers,
-                            args.log_workers,
-                            event,
-                            difficulty,
-                            args.log_interval,
-                        )
-                        .await;
+                        let mined_result =
+                            spawn_workers(args.n_workers, args.log_workers, event, difficulty)
+                                .await;
 
                         let mined_id = mined_result.event.id.clone().expect("expect mined id");
                         let mut nonce: Option<u64> = None;
