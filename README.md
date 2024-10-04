@@ -19,20 +19,32 @@ The UI/UX aims for:
 - Configurable PoW difficulty.
 - Multithreaded workers.
 - Realtime hashrate logging.
-- User can mine and publish their own notes, or sell PoW for zaps.
+- User can mine and publish their own PoW events.
+- User can sell PoW for BOLT11 invoices (via [LDK](https://lightningdevkit.org/)).
 
-So `notemine_hw` can be used in two different ways:
-- CLI (via `publish` subcommand)
-- JSON-RPC (via `sell` subcommand)
+> "Why not zaps?"
 
-![](./img/diagram.png)
+you might wonder... well, at the time of writing, the [`nostr-zapper`](https://crates.io/crates/nostr-zapper) 
+crate seems WIP, while LDK is a more mature library. So BOLT11 seems like a better choice, at least for now.
+
+> "Why not BOLT12?"
+
+you might wonder... well, there's no real need for invoice reusability. In fact, each PoW event payment
+should have a unique invoice. Therefore, BOLT11 is a more adequate choice.
 
 ### CLI
 
-The CLI UI assumes that the user wants to mine and publish their own notes as JSON files from disk.
+Assuming the user's system has some hardware available for mining, the CLI provides the following subcommands:
+- `notemine_hw mine`: takes an event as a JSON file from disk, and writes the mined PoW event into a new JSON file.
+- `notemine_hw publish`: takes an event as a JSON file from disk and publishes the PoW event (signed with user `nsec`) to some specified relay.
+- `notemine_hw sell`: spawns a JSON-RPC server + LN node for selling PoW.
 
-The `notemine_hw publish` subcommand is used for mining notes via CLI.
+Assuming the user's system does not have some hardware available for mining, the CLI provides the following subcommands:
+- `notemine_hw buy`: spawns a JSON-RPC client for buying PoW.
 
+#### `notemine_hw mine`
+
+#### `notemine_hw publish`
 ```shell
 $ notemine_hw publish -h
 Usage: notemine_hw publish --n-workers <N_WORKERS> --log-interval <LOG_INTERVAL> --difficulty <DIFFICULTY> --event-json <EVENT_JSON> --relay-url <RELAY_URL> --nsec <NSEC>
@@ -106,9 +118,9 @@ $ cat event.json
 }
 ```
 
-### JSON-RPC
+#### `notemine_hw sell`
 
-The JSON-RPC UI assumes the user wants to sell PoW for zaps.
+This subcommand allows the user to sell PoW for BOLT11 invoices.
 
 PoW Price is calculated according to this formula:
 
@@ -124,6 +136,8 @@ where:
 PoW sellers modulate their PoW Price factor $p$ in order to charge more or less sats according to PoW difficulty.
 
 The `notemine_hw sell` subcommand is used to sell PoW.
+
+xxx todo more LN info on CLI args xxx
 
 ```shell
 $ notemine_hw sell -h
@@ -160,86 +174,13 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
 
 In the example above, the buyer needs to zap `1048576.0` sats to mine a note with difficulty `20`, because `pow-price-factor` is set to `1.0`.
 
-The PoW buyer sends a zap (along with the event to be mined) via JSON-RPC. If the zap contains enough sats, the response contains the mined event `id`:
-```shell 
-$ curl -X POST -H "Content-Type: application/json" -d '{
-   "jsonrpc": "2.0",
-   "method": "mine",
-   "params": {
-      "event": {
-         "pubkey": "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2",
-         "created_at": 1668680774,
-         "kind": 1,
-         "tags": [],
-         "content": "hello world",
-      },
-      "difficulty": 20,
-      "zap": "f481897ee877321783bb76133622b3cc344d691bb79cd6be88f44e819c3b2306"
-   },
-   "id": 1
-}' http://localhost:1337
-{
-  "jsonrpc": "2.0",
-  "result": {
-    "id": "000006e73a6b1c2602fc41444c7c9fe382061a5e6616bf533379a043c8c77c75",
-    "nonce": 7378697629483745322,
-    "difficulty": 20
-  },
-  "id": 1
-}
-```
+xxx todo JSON-RPC for BOLT11 invoice xxx
 
-If the zap is invalid, `notemine_hw` replies with an error:
-```shell
-$ curl -X POST -H "Content-Type: application/json" -d '{
-   "jsonrpc": "2.0",
-   "method": "mine",
-   "params": {
-      "pubkey": "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2",
-      "created_at": 1668680774,
-      "kind": 1,
-      "tags": [],
-      "content": "hello world",
-      "difficulty": 150,
-      "zap": "nonsense"
-   },
-   "id": 1
-}' http://localhost:1337
-{
-  "jsonrpc": "2.0",
-  "error": {
-    "code": -32602,
-    "message": "Invalid Zap"
-  },
-  "id": 1
-}
-```
+### `notemine_hw buy`
 
-If the zap does not carry sufficient sats to cover for the PoW price of the requested difficulty, `notemine_hw` replies with an error.
-```shell 
-$ curl -X POST -H "Content-Type: application/json" -d '{
-   "jsonrpc": "2.0",
-   "method": "mine",
-   "params": {
-      "pubkey": "98590c0f4959a49f3524b7c009c190798935eeaa50b1232ba74195b419eaa2f2",
-      "created_at": 1668680774,
-      "kind": 1,
-      "tags": [],
-      "content": "hello world",
-      "difficulty": 150,
-      "zap": "f481897ee877321783bb76133622b3cc344d691bb79cd6be88f44e819c3b2306"
-   },
-   "id": 1
-}' http://localhost:1337
-{
-  "jsonrpc": "2.0",
-  "error": {
-    "code": -32602,
-    "message": "Insufficient Zap"
-  },
-  "id": 1
-}
-```
+This command allows for the user to buy PoW by paying BOLT11 invoices.
+
+xxx todo CLI xxx
 
 ## platform support
 

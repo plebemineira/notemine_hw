@@ -11,9 +11,8 @@ use nostr_sdk::{JsonUtil, Keys, SecretKey, UnsignedEvent};
 
 use crate::args::{PublishArgs, SellArgs};
 use crate::client::publish;
-use crate::error::ZapError;
 use crate::miner::{spawn_workers, PoWEvent};
-use crate::sell::{pow_price, verify_zap};
+use crate::sell::pow_price;
 
 pub async fn mine(args: PublishArgs) {
     if args.n_workers < 1 {
@@ -81,49 +80,6 @@ pub async fn sell(args: SellArgs) {
                     Ok(json!({ "difficulty": difficulty, "pow-price": pow_price, "pow-price-factor": args.pow_price_factor }))
                 } else {
                     Err(Error::invalid_params("Invalid params"))
-                }
-            }
-            Err(_) => Err(Error::invalid_params("Invalid params")),
-        }
-    });
-
-    io.add_method("mine", move |params: Params| async move {
-        let parsed: Result<MineRpc, _> = serde_json::from_value(params.parse()?)
-            .map_err(|_| Error::invalid_params("Invalid params"));
-        match parsed {
-            Ok(MineRpc {
-                event,
-                difficulty,
-                zap,
-            }) => {
-                match verify_zap(zap, args.pow_price_factor, difficulty).await {
-                    Ok(()) => {
-                        // mine
-                        let start_instant = Instant::now();
-
-                        let mined_result =
-                            spawn_workers(args.n_workers, args.log_workers, event, difficulty)
-                                .await;
-
-                        let mined_id = mined_result.event.id.clone().expect("expect mined id");
-                        let mut nonce: Option<u64> = None;
-                        for tag in &mined_result.event.tags {
-                            if tag.contains(&"nonce".to_string()) {
-                                nonce = Some(tag[1].parse::<u64>().expect("expect valid u64"))
-                            }
-                        }
-                        // log total mining time
-                        let duration = Instant::now().duration_since(start_instant).as_secs_f32();
-
-                        info!("successfully mined event in {} seconds", duration);
-                        info!("{:?}", mined_result);
-
-                        Ok(json!({ "id": mined_id, "nonce": nonce, "difficulty": difficulty }))
-                    }
-                    Err(ZapError::InsufficientZap) => {
-                        Err(Error::invalid_params("Insufficient Zap"))
-                    }
-                    Err(ZapError::InvalidZap) => Err(Error::invalid_params("Invalid Zap")),
                 }
             }
             Err(_) => Err(Error::invalid_params("Invalid params")),
