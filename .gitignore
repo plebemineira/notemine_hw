@@ -4,3 +4,5 @@ target
 .idea
 ./pkg
 !./demo/pkg
+
+nix-bitcoin-core-archive
